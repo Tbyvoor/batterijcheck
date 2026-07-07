@@ -348,6 +348,10 @@
           <div class="chip active" data-val="3500"><span class="ct">Gemiddeld</span><span class="cs">± 3.500 kWh</span></div>
           <div class="chip" data-val="5000"><span class="ct">Veel</span><span class="cs">± 5.000 kWh</span></div>
         </div>
+        <div class="field" style="margin-top:9px;">
+          <input id="c_verbruikExact" type="number" min="500" max="30000" inputmode="numeric" placeholder="Weet je het exact? Vul het hier in" oninput="exactVerbruikGewijzigd()">
+          <span class="unit">kWh/jaar</span>
+        </div>
 
         <label>Ben je eigenaar van de woning?</label>
         <div class="chips" id="eigenaarChips" style="grid-template-columns:1fr 1fr;">
@@ -666,6 +670,14 @@ const KWH_PER_PANEEL = 340;        // gemiddelde jaaropbrengst per paneel in NL 
 // de opwek). ~30% is het gemiddelde over alle huishoudens (bron: Milieu
 // Centraal); we laten 'm richtinggevend meebewegen per gekozen verbruiksniveau.
 const ZELFVERBRUIK_PER_TIER = { 2500: 0.22, 3500: 0.30, 5000: 0.38 };
+// voor een exact opgegeven verbruik: lineair interpoleren tussen de tiers,
+// zodat elk getal een passend zelfverbruikspercentage krijgt
+function zelfverbruikFractieVoor(v){
+  if(v <= 2500) return 0.22;
+  if(v <= 3500) return 0.22 + (v-2500)/1000 * (0.30-0.22);
+  if(v <= 5000) return 0.30 + (v-3500)/1500 * (0.38-0.30);
+  return 0.38;
+}
 const STROOMPRIJS_ALLIN = 0.26;    // euro/kWh, huidig volledig tarief incl. belasting/BTW (bron: CBS, jan 2026)
 const KAAL_LEVERINGSTARIEF = 0.10; // euro/kWh, tarief zonder belasting/BTW (bron: CBS, jan 2026)
 const COMPENSATIE_FACTOR = 0.5;    // wettelijk minimum vanaf 2027 (eerste 3 jaar), percentage van het KALE tarief
@@ -698,11 +710,13 @@ function berekenVerlies(){
 }
 
 function voerBerekeningUit(panelen){
-  const verbruik = parseInt(document.querySelector('#verbruikChips .chip.active').dataset.val);
+  // exact ingevuld verbruik heeft voorrang op de snelknoppen
+  const exact = parseInt(document.getElementById('c_verbruikExact').value);
+  const verbruik = (exact && exact >= 500) ? exact : parseInt(document.querySelector('#verbruikChips .chip.active').dataset.val);
   const eigenaar = document.querySelector('#eigenaarChips .chip.active').dataset.val;
 
   const opwek = panelen * KWH_PER_PANEEL;
-  const zelfverbruikFractie = ZELFVERBRUIK_PER_TIER[verbruik] || 0.30;
+  const zelfverbruikFractie = zelfverbruikFractieVoor(verbruik);
   const zelfverbruik = Math.min(opwek * zelfverbruikFractie, verbruik, opwek);
   const surplus = Math.max(0, opwek - zelfverbruik); // bruto teruglevering aan het net
   const verliesPerKwh = STROOMPRIJS_ALLIN - (KAAL_LEVERINGSTARIEF * COMPENSATIE_FACTOR);
@@ -754,8 +768,14 @@ document.getElementById('verbruikChips').addEventListener('click', e=>{
   if(!chip) return;
   document.querySelectorAll('#verbruikChips .chip').forEach(c=>c.classList.remove('active'));
   chip.classList.add('active');
+  // een knopje kiezen wist het exacte veld — het knopje leidt dan weer
+  document.getElementById('c_verbruikExact').value = '';
   if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen); // direct herberekenen, geen laadanimatie nodig
 });
+// exact veld gewijzigd: direct herberekenen als er al een uitkomst staat
+function exactVerbruikGewijzigd(){
+  if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen);
+}
 document.getElementById('eigenaarChips').addEventListener('click', e=>{
   const chip = e.target.closest('.chip');
   if(!chip) return;
