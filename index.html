@@ -354,11 +354,15 @@
   .final p{ color:var(--on-ink-dim); margin:14px auto 26px; max-width:44ch; font-size:16.5px; }
   .final .btn{ max-width:340px; margin:0 auto; }
 
-  footer{ background:var(--ink); color:var(--on-ink-dim); border-top:1px solid var(--border-ink); padding:34px 0; font-size:12.5px; line-height:1.7; }
+  footer{ background:var(--ink); color:var(--on-ink-dim); padding:34px 0; font-size:12.5px; line-height:1.7; }
   footer .disc{ max-width:78ch; }
-  .footer-bedrijf{ max-width:78ch; margin-top:18px; padding-top:16px; border-top:1px solid var(--border-ink); font-size:12px; }
-  .footer-bedrijf a{ color:var(--solar); text-decoration:none; }
-  .footer-bedrijf a:hover{ text-decoration:underline; }
+  .footer-bedrijf{ background:#080d18; border-top:1px solid var(--border-ink); padding:16px 0; }
+  .footer-bedrijf-inner{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px 22px; text-align:center; }
+  .footer-bedrijf-inner span, .footer-bedrijf-inner a{ font-size:12.5px; color:var(--on-ink-dim); position:relative; }
+  .footer-bedrijf-inner span strong{ color:var(--on-ink); font-weight:700; }
+  .footer-bedrijf-inner a{ text-decoration:none; }
+  .footer-bedrijf-inner a:hover{ color:var(--solar); text-decoration:underline; }
+  .footer-bedrijf-inner > *:not(:last-child)::after{ content:''; position:absolute; right:-11px; top:50%; transform:translateY(-50%); width:3px; height:3px; border-radius:50%; background:var(--on-ink-dim); opacity:.5; }
   footer a{ color:var(--on-ink); }
 
   .hidden{ display:none !important; }
@@ -703,9 +707,12 @@
       <strong style="color:var(--on-ink);">Salderingscheck</strong> — gratis &amp; vrijblijvend advies over thuisbatterijen.<br><br>
       Alle bedragen zijn indicatief en gebaseerd op gemiddelden (~340 kWh per paneel per jaar, ~30% eigen verbruik zonder batterij volgens Milieu Centraal, een all-in stroomtarief van &euro;0,26/kWh en een kaal leveringstarief van &euro;0,10/kWh volgens CBS, januari 2026) en op de <em>Wet be&euml;indiging salderingsregeling</em> (terugleververgoeding minimaal 50% van het kale tarief, eerste 3 jaar). De 10-jaarsprojectie gaat uit van gelijkblijvende tarieven en is puur indicatief. Je werkelijke situatie kan afwijken; dit is geen persoonlijk financieel advies.
     </div>
-    <div class="footer-bedrijf">
-      Salderingscheck is een dienst van <strong>Tobias Slootweg Sales</strong> &middot; KvK 95183876 &middot;
-      <a href="mailto:Tobias.Zakelijk@outlook.com">Tobias.Zakelijk@outlook.com</a> &middot;
+  </div>
+  <div class="footer-bedrijf">
+    <div class="wrap footer-bedrijf-inner">
+      <span><strong>Tobias Slootweg Sales</strong></span>
+      <span>KvK 95183876</span>
+      <a href="mailto:Tobias.Zakelijk@outlook.com">Tobias.Zakelijk@outlook.com</a>
       <a href="privacy.html">Privacyverklaring</a>
     </div>
   </div>
