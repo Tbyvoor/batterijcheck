@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Leads: iedereen mag een lead achterlaten (create).
+    // Alleen de beheerder mag ze lezen, wijzigen en verwijderen.
+    // Uitzondering: een bezoeker mag zijn zojuist achtergelaten lead 'warm'
+    // maken (belafspraak met specialist) — maar UITSLUITEND de warm-velden,
+    // nooit adres, telefoon, status of andere gegevens.
+    match /leads/{leadId} {
+      allow create: if true;
+      allow read, delete: if request.auth != null
+        && request.auth.uid == 'IF2uSm0e0gdxZniW56KF7J7bVdM2';
+      allow update: if (request.auth != null
+          && request.auth.uid == 'IF2uSm0e0gdxZniW56KF7J7bVdM2')
+        || request.resource.data.diff(resource.data)
+             .affectedKeys().hasOnly(['warm', 'warmVoorkeur', 'warmTijd']);
+    }
+
+    // Analytics: geanonimiseerde funnel-tellers. Iedereen mag ophogen,
+    // alleen de beheerder mag ze lezen.
+    match /analytics/{doc} {
+      allow read: if request.auth != null
+        && request.auth.uid == 'IF2uSm0e0gdxZniW56KF7J7bVdM2';
+      allow write: if true;
+    }
+  }
+}

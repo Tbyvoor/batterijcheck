@@ -252,6 +252,27 @@
   .thanks h3{ font-family:var(--fd); font-weight:800; font-size:23px; }
   .thanks p{ font-size:15px; color:var(--text2); margin-top:8px; max-width:34ch; margin-left:auto; margin-right:auto; }
 
+  /* schatting-melding onder het batterij-advies */
+  .schatting-melding{ display:flex; gap:10px; align-items:flex-start; text-align:left; max-width:44ch; margin:18px auto 0; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:13px 15px; font-size:13px; color:var(--text2); line-height:1.55; }
+  .schatting-melding svg{ width:18px; height:18px; color:var(--solar-deep); flex-shrink:0; margin-top:1px; }
+  .schatting-melding b{ color:var(--text1); }
+
+  /* specialist-boeking (warme lead) */
+  .specialist{ margin:20px auto 0; max-width:44ch; background:var(--ink); color:var(--on-ink); border-radius:16px; padding:22px 22px 24px; text-align:center; }
+  .specialist h4{ font-family:var(--fd); font-weight:800; font-size:18px; color:#fff; }
+  .specialist p{ font-size:13.5px; color:var(--on-ink-dim); margin:8px auto 16px; max-width:36ch; line-height:1.55; }
+  .specialist .btn-solar{ width:100%; }
+  .specialist-form{ margin:16px auto 0; max-width:44ch; background:var(--surface-2); border:1px solid var(--border); border-radius:16px; padding:20px; }
+  .specialist-form .sf-label{ font-family:var(--fd); font-weight:700; font-size:14px; color:var(--text1); margin-bottom:12px; }
+  #voorkeurChips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  #voorkeurChips .chip{ flex:0 0 auto; padding:10px 16px; font-size:13.5px; font-weight:600; color:var(--text2); }
+  #voorkeurChips .chip.active{ color:#fff; }
+  .specialist-done{ margin:20px auto 0; max-width:44ch; background:var(--keep-bg); border-radius:16px; padding:24px 22px; text-align:center; }
+  .specialist-done .sd-check{ width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:var(--keep); display:flex; align-items:center; justify-content:center; }
+  .specialist-done .sd-check svg{ width:28px; height:28px; color:#fff; }
+  .specialist-done h4{ font-family:var(--fd); font-weight:800; font-size:18px; color:var(--text1); }
+  .specialist-done p{ font-size:13.5px; color:var(--text2); margin:8px auto 0; max-width:34ch; line-height:1.55; }
+
   /* Sociale bewijskracht */
   .proof{ background:var(--surface); }
   .proof-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; text-align:center; }
@@ -523,7 +544,37 @@
             <div class="bat-kwh tnum"><span id="batKwh">—</span> <span>kWh thuisbatterij</span></div>
             <p class="bat-note" id="batNote">Groot genoeg om ook je zonnigste dag volledig op te vangen.</p>
           </div>
-          <p style="margin-top:16px;">Vragen over deze batterij? We kunnen je vrijblijvend bellen met advies — je zit nergens aan vast.</p>
+
+          <p class="schatting-melding">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span><b>Let op:</b> dit advies is een schatting op basis van je eigen invoer. Je exacte situatie — dak, verbruikspatroon en stroomcontract — bepaalt welke batterij écht het beste bij je past.</span>
+          </p>
+
+          <!-- Warme-lead upgrade: gratis belafspraak met een specialist -->
+          <div class="specialist" id="specialistBlok">
+            <h4>Wil je het precíes weten?</h4>
+            <p>Plan een gratis, vrijblijvend belletje met een specialist. Samen rekenen we jouw exacte opbrengst door en kijken we welke batterij het meeste oplevert — je zit nergens aan vast.</p>
+            <button class="btn btn-solar" id="specialistBtn" onclick="openSpecialist()" style="margin-top:4px;">Plan mijn gratis belafspraak</button>
+          </div>
+
+          <!-- Voorkeursmoment kiezen -->
+          <div class="specialist-form hidden" id="specialistForm">
+            <p class="sf-label">Wanneer bellen we je het liefst?</p>
+            <div class="chips" id="voorkeurChips">
+              <button type="button" class="chip active" data-val="Maakt niet uit">Maakt niet uit</button>
+              <button type="button" class="chip" data-val="Ochtend">Ochtend</button>
+              <button type="button" class="chip" data-val="Middag">Middag</button>
+              <button type="button" class="chip" data-val="Avond">Avond</button>
+            </div>
+            <button class="btn btn-solar" onclick="bevestigSpecialist()" style="margin-top:14px;">Bevestig mijn afspraak</button>
+          </div>
+
+          <!-- Bevestiging na boeken -->
+          <div class="specialist-done hidden" id="specialistDone">
+            <div class="sd-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <h4>Je belafspraak staat genoteerd</h4>
+            <p id="specialistDoneNote">Een specialist belt je op je voorkeursmoment voor een exacte doorrekening. Tot snel!</p>
+          </div>
         </div>
       </div>
     </div>
@@ -683,6 +734,7 @@ const KAAL_LEVERINGSTARIEF = 0.10; // euro/kWh, tarief zonder belasting/BTW (bro
 const COMPENSATIE_FACTOR = 0.5;    // wettelijk minimum vanaf 2027 (eerste 3 jaar), percentage van het KALE tarief
 
 let laatsteBerekening = null;
+let laatsteLeadId = null;
 
 let funnelStap = { berekend:false, piekdag:false, formulier:false };
 function berekenVerlies(){
@@ -712,7 +764,8 @@ function berekenVerlies(){
 function voerBerekeningUit(panelen){
   // exact ingevuld verbruik heeft voorrang op de snelknoppen
   const exact = parseInt(document.getElementById('c_verbruikExact').value);
-  const verbruik = (exact && exact >= 500) ? exact : parseInt(document.querySelector('#verbruikChips .chip.active').dataset.val);
+  const actiefChip = document.querySelector('#verbruikChips .chip.active');
+  const verbruik = (exact && exact >= 500) ? exact : (actiefChip ? parseInt(actiefChip.dataset.val) : 3500);
   const eigenaar = document.querySelector('#eigenaarChips .chip.active').dataset.val;
 
   const opwek = panelen * KWH_PER_PANEEL;
@@ -772,8 +825,16 @@ document.getElementById('verbruikChips').addEventListener('click', e=>{
   document.getElementById('c_verbruikExact').value = '';
   if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen); // direct herberekenen, geen laadanimatie nodig
 });
-// exact veld gewijzigd: direct herberekenen als er al een uitkomst staat
+// exact veld gewijzigd: knopjes deselecteren zolang er een eigen getal staat,
+// en herberekenen als er al een uitkomst staat
 function exactVerbruikGewijzigd(){
+  const v = parseInt(document.getElementById('c_verbruikExact').value);
+  const chips = document.querySelectorAll('#verbruikChips .chip');
+  if(v && v >= 500){
+    chips.forEach(c=>c.classList.remove('active'));
+  } else if(![...chips].some(c=>c.classList.contains('active'))){
+    if(chips[1]) chips[1].classList.add('active'); // terug naar 'Gemiddeld' als het veld leeg is
+  }
   if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen);
 }
 document.getElementById('eigenaarChips').addEventListener('click', e=>{
@@ -915,7 +976,7 @@ async function verstuurLead(){
   const naam = `${voornaam} ${achternaam}`;
   const lead = { naam, voornaam, achternaam, telefoon, adres: geocodedAdres, berekening: laatsteBerekening, tijd: new Date().toISOString(), gebeld: false };
 
-  if(window.leadSync){ await window.leadSync.saveLead(lead); }
+  if(window.leadSync){ laatsteLeadId = await window.leadSync.saveLead(lead); }
   else { console.log('LEAD (nog geen cloud-koppeling actief):', lead); }
   trackEvent('lead');
 
@@ -937,10 +998,52 @@ async function verstuurLead(){
   // 2) de grote onthulling in de bedankt-kaart, met batterij-animatie
   document.getElementById('batKwh').textContent = capaciteit;
   document.getElementById('batNote').textContent = `Op basis van je piekdag van ${laatsteBerekening.piekdagKwh} kWh teruglevering — groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
+  // specialist-boeking terugzetten naar begintoestand
+  document.getElementById('specialistBlok').classList.remove('hidden');
+  document.getElementById('specialistBtn').classList.remove('hidden');
+  document.getElementById('specialistForm').classList.add('hidden');
+  document.getElementById('specialistDone').classList.add('hidden');
+
   const thanks = document.getElementById('thanksCard');
   thanks.classList.remove('hidden');
   thanks.scrollIntoView({behavior:'smooth', block:'center'});
   laadBatterijAnimatie();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SPECIALIST-BELAFSPRAAK — upgrade van een lead naar een WARME lead.
+   De lead bestaat al (uit verstuurLead); hier zetten we 'warm' aan.
+══════════════════════════════════════════════════════════════ */
+function openSpecialist(){
+  document.getElementById('specialistBtn').classList.add('hidden');
+  const f = document.getElementById('specialistForm');
+  f.classList.remove('hidden');
+  f.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+// voorkeursmoment-knopjes
+document.addEventListener('click', function(e){
+  const chip = e.target.closest('#voorkeurChips .chip');
+  if(!chip) return;
+  document.querySelectorAll('#voorkeurChips .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+});
+
+async function bevestigSpecialist(){
+  const actief = document.querySelector('#voorkeurChips .chip.active');
+  const voorkeur = actief ? actief.dataset.val : 'Maakt niet uit';
+
+  if(window.leadSync && laatsteLeadId){ await window.leadSync.markWarm(laatsteLeadId, voorkeur); }
+  else { console.log('WARME LEAD (nog geen cloud-koppeling of lead-id):', voorkeur); }
+  trackEvent('warme_lead');
+
+  document.getElementById('specialistBlok').classList.add('hidden');
+  document.getElementById('specialistForm').classList.add('hidden');
+  const done = document.getElementById('specialistDone');
+  const wanneer = voorkeur === 'Maakt niet uit' ? 'zo snel mogelijk' : `in de ${voorkeur.toLowerCase()}`;
+  document.getElementById('specialistDoneNote').textContent = `Een specialist belt je ${wanneer} voor een exacte doorrekening. Tot snel!`;
+  done.classList.remove('hidden');
+  done.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 // Laat de batterij vak-voor-vak "opladen" en toon daarna de bliksem.
@@ -981,7 +1084,7 @@ function laadBatterijAnimatie(){
    FIREBASE — leads opslaan + funnel-analytics bundelen in de cloud.
 ══════════════════════════════════════════════════════════════ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBRKjRQLImc4Aw8TIkhzuesnIowETybOOg",
@@ -997,8 +1100,14 @@ const db = getFirestore(app);
 // Leads wegschrijven naar de 'leads'-collectie
 window.leadSync = {
   async saveLead(lead){
-    try{ await addDoc(collection(db, 'leads'), lead); return true; }
-    catch(e){ console.error('Lead opslaan mislukt:', e); return false; }
+    try{ const ref = await addDoc(collection(db, 'leads'), lead); return ref.id; }
+    catch(e){ console.error('Lead opslaan mislukt:', e); return null; }
+  },
+  // markeer een bestaande lead als 'warm' (specialist-belafspraak aangevraagd)
+  async markWarm(id, voorkeur){
+    if(!id) return false;
+    try{ await updateDoc(doc(db, 'leads', id), { warm:true, warmVoorkeur: voorkeur || '', warmTijd: new Date().toISOString() }); return true; }
+    catch(e){ console.error('Warm markeren mislukt:', e); return false; }
   }
 };
 
