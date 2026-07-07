@@ -262,16 +262,39 @@
   .specialist h4{ font-family:var(--fd); font-weight:800; font-size:18px; color:#fff; }
   .specialist p{ font-size:13.5px; color:var(--on-ink-dim); margin:8px auto 16px; max-width:36ch; line-height:1.55; }
   .specialist .btn-solar{ width:100%; }
-  .specialist-form{ margin:16px auto 0; max-width:44ch; background:var(--surface-2); border:1px solid var(--border); border-radius:16px; padding:20px; }
-  .specialist-form .sf-label{ font-family:var(--fd); font-weight:700; font-size:14px; color:var(--text1); margin-bottom:12px; }
-  #voorkeurChips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
-  #voorkeurChips .chip{ flex:0 0 auto; padding:10px 16px; font-size:13.5px; font-weight:600; color:var(--text2); }
-  #voorkeurChips .chip.active{ color:#fff; }
   .specialist-done{ margin:20px auto 0; max-width:44ch; background:var(--keep-bg); border-radius:16px; padding:24px 22px; text-align:center; }
   .specialist-done .sd-check{ width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:var(--keep); display:flex; align-items:center; justify-content:center; }
   .specialist-done .sd-check svg{ width:28px; height:28px; color:#fff; }
   .specialist-done h4{ font-family:var(--fd); font-weight:800; font-size:18px; color:var(--text1); }
   .specialist-done p{ font-size:13.5px; color:var(--text2); margin:8px auto 0; max-width:34ch; line-height:1.55; }
+
+  /* ── Boek-overlay (aparte plek voor dag/tijd) ── */
+  .boek-overlay{ position:fixed; inset:0; z-index:2000; background:rgba(9,13,22,.72); backdrop-filter:blur(3px); display:flex; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
+  .boek-overlay.hidden{ display:none; }
+  .boek-modal{ position:relative; background:var(--surface); border-radius:20px; width:100%; max-width:440px; margin:auto; padding:30px 26px 26px; box-shadow:0 30px 80px -20px rgba(0,0,0,.6); animation:boekIn .22s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes boekIn{ from{ opacity:0; transform:translateY(14px) scale(.98); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){ .boek-modal{ animation:none; } }
+  .boek-close{ position:absolute; top:14px; right:14px; width:34px; height:34px; border:none; border-radius:50%; background:var(--surface-2); color:var(--text2); font-size:22px; line-height:1; cursor:pointer; }
+  .boek-close:hover{ background:var(--border); }
+  .boek-tag{ display:inline-block; font-family:var(--fd); font-weight:700; font-size:11px; letter-spacing:.5px; text-transform:uppercase; color:var(--solar-deep); background:rgba(255,179,0,.14); border-radius:99px; padding:5px 12px; margin-bottom:12px; }
+  .boek-modal h3{ font-family:var(--fd); font-weight:800; font-size:22px; letter-spacing:-.3px; color:var(--text1); }
+  .boek-sub{ font-size:13.5px; color:var(--text2); line-height:1.55; margin:8px 0 22px; }
+  .boek-step{ margin-bottom:20px; }
+  .boek-hidden{ display:none; }
+  .boek-label{ display:flex; align-items:center; gap:9px; font-family:var(--fd); font-weight:700; font-size:14px; color:var(--text1); margin-bottom:11px; }
+  .boek-label span{ display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--ink); color:#fff; font-size:12px; }
+  .boek-dagen{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; }
+  .boek-tijden{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .boek-chip{ flex:0 0 auto; border:1.6px solid var(--border); background:var(--surface-2); color:var(--text1); border-radius:11px; padding:11px 10px; font-family:var(--fd); font-weight:600; font-size:13.5px; cursor:pointer; transition:.14s; white-space:nowrap; text-align:center; }
+  .boek-dagen .boek-chip{ min-width:70px; display:flex; flex-direction:column; gap:2px; line-height:1.2; }
+  .boek-dagen .boek-chip small{ font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+  .boek-chip:hover{ border-color:var(--solar); }
+  .boek-chip.active{ background:var(--ink); border-color:var(--ink); color:#fff; }
+  .boek-dagen .boek-chip.active small{ color:var(--on-ink-dim); }
+  .boek-keuze{ background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-size:13.5px; color:var(--text1); margin-bottom:18px; }
+  .boek-keuze b{ color:var(--solar-deep); }
+  #boekBevestig{ width:100%; }
+  #boekBevestig:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
 
   /* Sociale bewijskracht */
   .proof{ background:var(--surface); }
@@ -547,7 +570,7 @@
 
           <p class="schatting-melding">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <span><b>Let op:</b> dit advies is een schatting op basis van je eigen invoer. Je exacte situatie — dak, verbruikspatroon en stroomcontract — bepaalt welke batterij écht het beste bij je past.</span>
+            <span><b>Let op:</b> dit is een schatting. Je exacte situatie bepaalt welke batterij écht het beste past.</span>
           </p>
 
           <!-- Warme-lead upgrade: gratis belafspraak met een specialist -->
@@ -555,18 +578,6 @@
             <h4>Wil je het precíes weten?</h4>
             <p>Plan een gratis, vrijblijvend belletje met een specialist. Samen rekenen we jouw exacte opbrengst door en kijken we welke batterij het meeste oplevert — je zit nergens aan vast.</p>
             <button class="btn btn-solar" id="specialistBtn" onclick="openSpecialist()" style="margin-top:4px;">Plan mijn gratis belafspraak</button>
-          </div>
-
-          <!-- Voorkeursmoment kiezen -->
-          <div class="specialist-form hidden" id="specialistForm">
-            <p class="sf-label">Wanneer bellen we je het liefst?</p>
-            <div class="chips" id="voorkeurChips">
-              <button type="button" class="chip active" data-val="Maakt niet uit">Maakt niet uit</button>
-              <button type="button" class="chip" data-val="Ochtend">Ochtend</button>
-              <button type="button" class="chip" data-val="Middag">Middag</button>
-              <button type="button" class="chip" data-val="Avond">Avond</button>
-            </div>
-            <button class="btn btn-solar" onclick="bevestigSpecialist()" style="margin-top:14px;">Bevestig mijn afspraak</button>
           </div>
 
           <!-- Bevestiging na boeken -->
@@ -655,6 +666,29 @@
     </div>
   </div>
 </footer>
+
+<!-- ── Boek-overlay: aparte plek om een dag + tijd te kiezen ── -->
+<div class="boek-overlay hidden" id="boekOverlay" onclick="if(event.target===this) sluitBoek()">
+  <div class="boek-modal" role="dialog" aria-modal="true" aria-labelledby="boekTitel">
+    <button class="boek-close" onclick="sluitBoek()" aria-label="Sluiten">&times;</button>
+    <div class="boek-tag">Gratis &amp; vrijblijvend</div>
+    <h3 id="boekTitel">Plan je belafspraak</h3>
+    <p class="boek-sub">Kies wanneer het jou uitkomt. Een specialist belt je dan voor een exacte doorrekening — je zit nergens aan vast.</p>
+
+    <div class="boek-step">
+      <div class="boek-label"><span>1</span> Kies een dag</div>
+      <div class="boek-dagen" id="boekDagen"></div>
+    </div>
+
+    <div class="boek-step boek-hidden" id="boekTijdStap">
+      <div class="boek-label"><span>2</span> Kies een tijd</div>
+      <div class="boek-tijden" id="boekTijden"></div>
+    </div>
+
+    <div class="boek-keuze boek-hidden" id="boekKeuze"></div>
+    <button class="btn btn-solar" id="boekBevestig" onclick="bevestigBoek()" disabled>Bevestig belafspraak</button>
+  </div>
+</div>
 
 <script>
 /* ══════════════════════════════════════════════════════════════
@@ -1008,7 +1042,6 @@ async function verstuurLead(){
   // specialist-boeking terugzetten naar begintoestand
   document.getElementById('specialistBlok').classList.remove('hidden');
   document.getElementById('specialistBtn').classList.remove('hidden');
-  document.getElementById('specialistForm').classList.add('hidden');
   document.getElementById('specialistDone').classList.add('hidden');
 
   const thanks = document.getElementById('thanksCard');
@@ -1021,34 +1054,105 @@ async function verstuurLead(){
    SPECIALIST-BELAFSPRAAK — upgrade van een lead naar een WARME lead.
    De lead bestaat al (uit verstuurLead); hier zetten we 'warm' aan.
 ══════════════════════════════════════════════════════════════ */
+const BEL_TIJDEN = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+const DAG_KORT = ['zo','ma','di','wo','do','vr','za'];
+const MAAND_KORT = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+let gekozenDag = null, gekozenTijd = null;
+
+// Open de aparte boek-plek (modal) met een dag- en tijdkiezer
 function openSpecialist(){
-  document.getElementById('specialistBtn').classList.add('hidden');
-  const f = document.getElementById('specialistForm');
-  f.classList.remove('hidden');
-  f.scrollIntoView({behavior:'smooth', block:'center'});
+  gekozenDag = null; gekozenTijd = null;
+  renderBoekDagen();
+  document.getElementById('boekTijdStap').classList.add('boek-hidden');
+  document.getElementById('boekKeuze').classList.add('boek-hidden');
+  document.getElementById('boekBevestig').disabled = true;
+  const ov = document.getElementById('boekOverlay');
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden'; // achtergrond niet mee-scrollen
 }
 
-// voorkeursmoment-knopjes
-document.addEventListener('click', function(e){
-  const chip = e.target.closest('#voorkeurChips .chip');
-  if(!chip) return;
-  document.querySelectorAll('#voorkeurChips .chip').forEach(c=>c.classList.remove('active'));
-  chip.classList.add('active');
+function sluitBoek(){
+  document.getElementById('boekOverlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape' && !document.getElementById('boekOverlay').classList.contains('hidden')) sluitBoek();
 });
 
-async function bevestigSpecialist(){
-  const actief = document.querySelector('#voorkeurChips .chip.active');
-  const voorkeur = actief ? actief.dataset.val : 'Maakt niet uit';
+// De eerstvolgende 8 dagen (vanaf morgen), zondag overgeslagen
+function renderBoekDagen(){
+  const wrap = document.getElementById('boekDagen');
+  wrap.innerHTML = '';
+  const d = new Date(); d.setHours(0,0,0,0);
+  let n = 0;
+  while(n < 8){
+    d.setDate(d.getDate() + 1);
+    if(d.getDay() === 0) continue; // zondag overslaan
+    const label = `${d.getDate()} ${MAAND_KORT[d.getMonth()]}`;
+    const val = `${DAG_KORT[d.getDay()]} ${d.getDate()} ${MAAND_KORT[d.getMonth()]}`;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'boek-chip'; btn.dataset.val = val;
+    btn.innerHTML = `<small>${DAG_KORT[d.getDay()]}</small>${label}`;
+    btn.onclick = ()=>kiesBoekDag(btn, val);
+    wrap.appendChild(btn);
+    n++;
+  }
+}
+
+function kiesBoekDag(btn, val){
+  document.querySelectorAll('#boekDagen .boek-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  gekozenDag = val; gekozenTijd = null;
+  renderBoekTijden();
+  document.getElementById('boekTijdStap').classList.remove('boek-hidden');
+  updateBoekKeuze();
+}
+
+function renderBoekTijden(){
+  const wrap = document.getElementById('boekTijden');
+  wrap.innerHTML = '';
+  BEL_TIJDEN.forEach(t=>{
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'boek-chip'; btn.textContent = t;
+    btn.onclick = ()=>kiesBoekTijd(btn, t);
+    wrap.appendChild(btn);
+  });
+}
+
+function kiesBoekTijd(btn, t){
+  document.querySelectorAll('#boekTijden .boek-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  gekozenTijd = t;
+  updateBoekKeuze();
+}
+
+function updateBoekKeuze(){
+  const keuze = document.getElementById('boekKeuze');
+  const knop = document.getElementById('boekBevestig');
+  if(gekozenDag && gekozenTijd){
+    keuze.innerHTML = `Je afspraak: <b>${gekozenDag} om ${gekozenTijd}</b>`;
+    keuze.classList.remove('boek-hidden');
+    knop.disabled = false;
+  } else {
+    keuze.classList.add('boek-hidden');
+    knop.disabled = true;
+  }
+}
+
+async function bevestigBoek(){
+  if(!gekozenDag || !gekozenTijd) return;
+  const voorkeur = `${gekozenDag} om ${gekozenTijd}`;
 
   if(window.leadSync && laatsteLeadId){ await window.leadSync.markWarm(laatsteLeadId, voorkeur); }
   else { console.log('WARME LEAD (nog geen cloud-koppeling of lead-id):', voorkeur); }
   trackEvent('warme_lead');
 
+  sluitBoek();
+
+  // in de advieskaart de bevestiging tonen
   document.getElementById('specialistBlok').classList.add('hidden');
-  document.getElementById('specialistForm').classList.add('hidden');
   const done = document.getElementById('specialistDone');
-  const wanneer = voorkeur === 'Maakt niet uit' ? 'zo snel mogelijk' : `in de ${voorkeur.toLowerCase()}`;
-  document.getElementById('specialistDoneNote').textContent = `Een specialist belt je ${wanneer} voor een exacte doorrekening. Tot snel!`;
+  document.getElementById('specialistDoneNote').textContent = `Een specialist belt je op ${gekozenDag} om ${gekozenTijd} voor een exacte doorrekening. Tot snel!`;
   done.classList.remove('hidden');
   done.scrollIntoView({behavior:'smooth', block:'center'});
 }
