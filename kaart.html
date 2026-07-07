@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BatterijCheck — Leadkaart (intern)</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b0e16">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Leads">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin>
+<style>
+  :root{
+    --bg:#0b0e16; --surface:#141824; --surface-2:#1c2130; --border:#2a3040;
+    --text1:#eef0f6; --text2:#aab2c8; --text3:#6e768c;
+    --brand:#ffb300; --good:#12b981; --lose:#ff5a5f;
+    --fd:system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:var(--fd); background:var(--bg); color:var(--text1); }
+
+  /* ── Login ── */
+  #gate{ position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; }
+  #gate .box{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:340px; text-align:center; }
+  #gate h1{ font-size:18px; margin:0 0 4px 0; }
+  #gate p{ font-size:13px; color:var(--text2); margin:0 0 16px 0; }
+  #gate input{ width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text1); font-size:16px; }
+  #gate button{ width:100%; margin-top:12px; padding:12px; border-radius:10px; border:none; background:var(--brand); color:#1a1200; font-weight:700; font-size:15px; cursor:pointer; }
+  #gate .err{ color:var(--lose); font-size:12.5px; margin-top:10px; display:none; }
+
+  /* ── Layout ── */
+  #main{ display:none; flex-direction:column; height:100vh; }
+  header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+  header h1{ font-size:15px; margin:0; white-space:nowrap; }
+  header .stats{ font-size:12.5px; color:var(--text2); margin-left:auto; }
+  select{ background:var(--surface-2); color:var(--text1); border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:13px; }
+
+  .workspace{ flex:1; display:flex; min-height:0; }
+  @media(max-width:720px){ .workspace{ flex-direction:column; } }
+
+  /* ── Kaart (Leaflet + PDOK overheidskaart) ── */
+  #mapwrap{ flex:1; min-height:0; position:relative; }
+  #map{ width:100%; height:100%; background:#0b0e16; }
+  .leaflet-container{ font-family:var(--fd); }
+  /* leadmarker: oplichtende stip */
+  .lead-marker{ width:18px; height:18px; border-radius:50%; border:3px solid #0b0e16; box-shadow:0 2px 6px rgba(0,0,0,.5); cursor:pointer; }
+  .map-note{ position:absolute; left:12px; bottom:10px; z-index:500; font-size:11px; color:var(--text2); background:rgba(11,14,22,.75); padding:4px 9px; border-radius:7px; }
+
+  /* ── Zijpaneel (lijst + detail) ── */
+  #side{ width:360px; flex-shrink:0; background:var(--surface); border-left:1px solid var(--border); display:flex; flex-direction:column; min-height:0; }
+  @media(max-width:720px){ #side{ width:auto; border-left:none; border-top:1px solid var(--border); max-height:45vh; } }
+
+  #detail{ border-bottom:1px solid var(--border); padding:16px; display:none; }
+  #detail.show{ display:block; }
+  #detail .dnaam{ font-size:17px; font-weight:800; }
+  #detail .dclose{ float:right; background:none; border:none; color:var(--text3); font-size:20px; cursor:pointer; line-height:1; }
+  .drow{ display:flex; gap:9px; align-items:flex-start; font-size:13.5px; margin-top:11px; color:var(--text1); }
+  .drow svg{ width:16px; height:16px; color:var(--text3); flex-shrink:0; margin-top:2px; }
+  .drow a{ color:var(--brand); text-decoration:none; font-weight:700; }
+  .dbat{ margin-top:15px; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:13px 15px; display:flex; align-items:center; gap:12px; }
+  .dbat .bico{ width:40px; height:40px; border-radius:10px; background:rgba(255,179,0,.14); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dbat .bico svg{ width:22px; height:22px; color:var(--brand); }
+  .dbat b{ font-size:18px; display:block; }
+  .dbat span{ font-size:12px; color:var(--text3); }
+  .dcalc{ margin-top:12px; font-size:12.5px; color:var(--text2); line-height:1.6; }
+  .dcalc b{ color:var(--text1); }
+  .dbelknop{ margin-top:14px; display:flex; gap:8px; }
+  .dbelknop a, .dbelknop button{ flex:1; text-align:center; padding:10px; border-radius:10px; border:none; font-family:var(--fd); font-weight:700; font-size:13.5px; cursor:pointer; text-decoration:none; }
+  .dbelknop .bel{ background:var(--brand); color:#1a1200; }
+  .dbelknop .mark{ background:var(--surface-2); color:var(--text1); border:1px solid var(--border); }
+  .verwijderknop{ width:100%; margin-top:16px; padding:9px; border-radius:9px; border:1px solid rgba(255,90,95,.3); background:transparent; color:var(--lose); font-family:var(--fd); font-size:12.5px; font-weight:600; cursor:pointer; }
+  .verwijderknop:hover{ background:rgba(255,90,95,.1); }
+
+  /* ── Statusblok ── */
+  .statusblok{ margin-top:16px; border-top:1px solid var(--border); padding-top:14px; }
+  .statusrij{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .terugknop{ background:none; border:none; color:var(--text3); font-size:12px; font-weight:600; cursor:pointer; padding:4px 6px; border-radius:7px; white-space:nowrap; }
+  .terugknop:hover{ color:var(--text1); background:var(--surface-2); }
+  .statuschip{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; padding:5px 12px; border-radius:99px; color:#0b0e16; }
+  .statuschip .cdot{ width:8px; height:8px; border-radius:50%; background:#0b0e16; opacity:.55; }
+  .statusnotitie{ font-size:12.5px; color:var(--text2); margin-top:8px; font-style:italic; }
+  .status-heading{ font-size:12px; color:var(--text3); font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin:14px 0 8px; }
+  .status-knoppen{ display:flex; flex-wrap:wrap; gap:7px; }
+  .status-knoppen button{ flex:1 1 auto; min-width:calc(50% - 4px); padding:10px 8px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface-2); color:var(--text1); font-family:var(--fd); font-weight:700; font-size:12.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .status-knoppen button:hover{ border-color:var(--text3); }
+  .status-knoppen button .kdot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .anders-invoer{ display:none; gap:8px; margin-top:8px; }
+  .anders-invoer.show{ display:flex; }
+  .anders-invoer input{ flex:1; padding:9px 11px; border-radius:9px; border:1px solid var(--border); background:var(--surface-2); color:var(--text1); font-size:14px; }
+  .anders-invoer button{ flex-shrink:0; padding:9px 14px; border-radius:9px; border:none; background:var(--brand); color:#1a1200; font-weight:700; cursor:pointer; }
+
+  #panel{ overflow-y:auto; flex:1; }
+  .lead-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 16px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .lead-row:hover, .lead-row.actief{ background:var(--surface-2); }
+  .lead-row .ln{ font-weight:700; font-size:13.5px; }
+  .lead-row .lm{ font-size:12px; color:var(--text3); margin-top:2px; }
+  .lead-row .lp{ font-size:13.5px; color:var(--brand); font-weight:700; }
+  .statusdot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .empty{ text-align:center; color:var(--text3); font-size:13px; padding:30px 16px; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="box">
+    <h1>&#128274; BatterijCheck &mdash; Leadkaart</h1>
+    <p>Deze pagina bevat priv&eacute;gegevens. Log in met je beheerdersaccount.</p>
+    <input id="gateEmail" type="email" placeholder="E-mailadres" autocomplete="username" style="margin-bottom:8px;">
+    <input id="gatePass" type="password" placeholder="Wachtwoord" autocomplete="current-password">
+    <button onclick="probeerLogin()">Inloggen</button>
+    <div class="err" id="gateErr">Inloggen mislukt, controleer je gegevens.</div>
+  </div>
+</div>
+
+<div id="main">
+  <header>
+    <h1>BatterijCheck &mdash; Leadkaart</h1>
+    <select id="regioFilter" onchange="renderAlles()">
+      <option value="">Alle provincies</option>
+    </select>
+    <div class="stats" id="statsLine">0 leads</div>
+  </header>
+  <div class="workspace">
+    <div id="mapwrap">
+      <div id="map"></div>
+      <div class="map-note">Kaart: PDOK (overheid) &middot; leadlocaties blijven priv&eacute;</div>
+    </div>
+    <div id="side">
+      <div id="detail"></div>
+      <div id="panel"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   LOGIN — via Firebase Authenticatie (module onderaan).
+══════════════════════════════════════════════════════════════ */
+function probeerLogin(){
+  const email = document.getElementById('gateEmail').value.trim();
+  const pass = document.getElementById('gatePass').value;
+  document.getElementById('gateErr').style.display = 'none';
+  if(window.adminLogin){
+    window.adminLogin(email, pass).catch(()=>{ document.getElementById('gateErr').style.display = 'block'; });
+  }
+}
+document.getElementById('gatePass').addEventListener('keydown', e=>{ if(e.key==='Enter') probeerLogin(); });
+function opIngelogd(){
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('main').style.display = 'flex';
+  setTimeout(initKaart, 50); // even wachten tot #map zichtbaar/gemeten is
+}
+
+/* ══════════════════════════════════════════════════════════════
+   KAART — Leaflet met de PDOK-achtergrondkaart (officiële kaart van
+   de Nederlandse overheid, dezelfde als het WOZ-loket). De kaart-
+   dienst levert alleen de achtergrondtegels; welke leads je markeert
+   blijft in je eigen browser en gaat nooit naar PDOK.
+══════════════════════════════════════════════════════════════ */
+let map, markers = {};
+let alleLeads = [];
+let actieveIdx = null;
+let gesprekOpen = null; // idx waarvoor de gespreksopties zijn uitgeklapt
+let autoGezoomd = false; // eenmalig automatisch inzoomen op de leads
+
+// Statussen met bijbehorende kleur en label.
+const STATUS = {
+  nieuw:          { label:'Nieuw',            kleur:'#e8ecf5' },
+  afspraak:       { label:'Afspraak ingepland', kleur:'#3b82f6' }, // blauw
+  geen_interesse: { label:'Geen interesse',   kleur:'#ef4444' },    // rood
+  anders:         { label:'Anders',           kleur:'#f59e0b' },    // oranje
+  deal:           { label:'Deal geclosed',    kleur:'#4ade80' },    // lichtgroen
+  open_offerte:   { label:'Open offerte',     kleur:'#15803d' }     // donkergroen
+};
+function leadStatus(l){ return (l && l.status) || (l && l.gebeld ? 'afspraak' : 'nieuw'); }
+function statusKleur(l){ return (STATUS[leadStatus(l)] || STATUS.nieuw).kleur; }
+function afspraakGemaakt(l){ return l && (l.afspraakGemaakt || ['afspraak','deal','open_offerte'].includes(leadStatus(l))); }
+
+function initKaart(){
+  if(map){ map.invalidateSize(); return; }
+  map = L.map('map', { zoomControl:true, attributionControl:true }).setView([52.15, 5.5], 7);
+  // PDOK BRT-achtergrondkaart 'grijs' — nette topografische overheidskaart
+  L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', {
+    minZoom: 6, maxZoom: 19,
+    attribution: '&copy; <a href="https://www.pdok.nl">PDOK</a> / Kadaster'
+  }).addTo(map);
+
+  const start = ()=> window.leadSync.watchLeads(leads=>{ alleLeads = leads; renderAlles(); });
+  if(window.leadSync) start();
+  else window.addEventListener('leadsync-ready', start, {once:true});
+}
+
+function markerIcon(l, actief){
+  const kleur = statusKleur(l);
+  const stijl = `background:${kleur};` + (actief ? `box-shadow:0 0 0 3px #fff, 0 0 16px ${kleur};` : '');
+  return L.divIcon({
+    className: '',
+    html: `<div class="lead-marker" style="${stijl}"></div>`,
+    iconSize: [18,18], iconAnchor: [9,9]
+  });
+}
+
+function renderAlles(){
+  const filter = document.getElementById('regioFilter').value;
+
+  // provincie-filter aanvullen
+  const select = document.getElementById('regioFilter');
+  const bekend = new Set([...select.options].map(o=>o.value));
+  [...new Set(alleLeads.map(l=>l.adres && l.adres.provincie).filter(Boolean))].sort().forEach(p=>{
+    if(!bekend.has(p)){ const o=document.createElement('option'); o.value=p; o.textContent=p; select.appendChild(o); }
+  });
+
+  const leads = filter ? alleLeads.filter(l=>l.adres && l.adres.provincie===filter) : alleLeads;
+  document.getElementById('statsLine').textContent = `${leads.length} lead${leads.length===1?'':'s'}${filter?' in '+filter:''}`;
+
+  // bestaande markers weghalen en opnieuw plaatsen
+  Object.values(markers).forEach(m=>map.removeLayer(m));
+  markers = {};
+  const punten = [];
+  leads.forEach(l=>{
+    if(!l.adres || l.adres.lat == null) return;
+    const idx = alleLeads.indexOf(l);
+    const m = L.marker([l.adres.lat, l.adres.lng], { icon: markerIcon(l, idx===actieveIdx) });
+    m.on('click', ()=>focusLead(idx));
+    m.addTo(map);
+    markers[idx] = m;
+    punten.push([l.adres.lat, l.adres.lng]);
+  });
+
+  // bij de eerste keer laden: automatisch inzoomen zodat alle leads netjes
+  // in beeld passen (maar niet te ver bij één lead)
+  if(!autoGezoomd && punten.length){
+    autoGezoomd = true;
+    if(punten.length === 1) map.setView(punten[0], 13);
+    else map.fitBounds(punten, { padding:[50,50], maxZoom:13 });
+  }
+
+  // lijst
+  const panel = document.getElementById('panel');
+  if(!leads.length){
+    panel.innerHTML = '<div class="empty">Nog geen leads binnengekomen.</div>';
+  } else {
+    panel.innerHTML = [...leads].reverse().map(l=>{
+      const idx = alleLeads.indexOf(l);
+      const datum = l.tijd ? new Date(l.tijd).toLocaleDateString('nl-NL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+      return `
+        <div class="lead-row ${idx===actieveIdx?'actief':''}" onclick="focusLead(${idx})">
+          <span class="statusdot" style="background:${statusKleur(l)}"></span>
+          <div style="flex:1; min-width:0;">
+            <div class="ln">${l.naam}</div>
+            <div class="lm">${(l.adres&&l.adres.plaats)||''} &middot; ${datum}</div>
+          </div>
+          <span class="lp">${l.telefoon}</span>
+        </div>`;
+    }).join('');
+  }
+
+  // detailpaneel opnieuw tonen als er een lead actief is
+  if(actieveIdx != null && alleLeads[actieveIdx]) toonDetail(actieveIdx);
+}
+
+function focusLead(idx){
+  actieveIdx = idx;
+  renderAlles();
+  toonDetail(idx);
+  const l = alleLeads[idx];
+  if(map && l && l.adres && l.adres.lat != null){
+    map.setView([l.adres.lat, l.adres.lng], 17, { animate:true }); // inzoomen tot straat/huis-niveau
+  }
+}
+
+const BATTERIJ_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="15" height="12" rx="2"/><path d="M19 12h2v4h-2M8 4v4M13 4v4"/></svg>';
+
+function aanbevolenCapaciteit(piekKwh){ return Math.max(5, Math.ceil((piekKwh||0)/5)*5); }
+
+function toonDetail(idx){
+  const l = alleLeads[idx];
+  const d = document.getElementById('detail');
+  if(!l){ d.classList.remove('show'); return; }
+  const b = l.berekening || {};
+  const piek = b.piekdagKwh;
+  const cap = piek ? aanbevolenCapaciteit(piek) : null;
+  const telSchoon = (l.telefoon||'').replace(/[^0-9+]/g,'');
+
+  d.classList.add('show');
+  d.innerHTML = `
+    <button class="dclose" onclick="sluitDetail()">&times;</button>
+    <div class="dnaam">${l.naam || '—'}</div>
+    <div class="drow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
+      <a href="tel:${telSchoon}">${l.telefoon || '—'}</a>
+    </div>
+    <div class="drow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>${(l.adres && l.adres.weergavenaam) || '—'}${l.adres && l.adres.provincie ? ' · '+l.adres.provincie : ''}</span>
+    </div>
+    ${cap ? `
+      <div class="dbat">
+        <div class="bico">${BATTERIJ_ICON}</div>
+        <div><b>${cap} kWh thuisbatterij</b><span>aanbevolen bij piekdag van ${piek} kWh</span></div>
+      </div>` : ''}
+    ${b.verliesPerJaar != null ? `
+      <div class="dcalc">
+        Zonnepanelen: <b>${b.panelen ?? '—'}</b> &middot; verbruik: <b>${b.verbruik ? b.verbruik.toLocaleString('nl-NL')+' kWh' : '—'}</b> &middot; ${b.eigenaar==='ja'?'eigen woning':'huurwoning'}<br>
+        Geschat verlies vanaf 2027: <b>€${b.verliesPerJaar}/jaar</b> (€${b.verlies10jaar} over 10 jaar)
+      </div>` : ''}
+    <div class="dbelknop">
+      <a class="bel" href="tel:${telSchoon}">Bel nu</a>
+    </div>
+    ${renderStatusBlok(idx, l)}
+    <button class="verwijderknop" onclick="verwijderLead(${idx})">Lead verwijderen</button>`;
+}
+
+function verwijderLead(idx){
+  const l = alleLeads[idx];
+  if(!l) return;
+  if(!confirm(`Weet je zeker dat je de lead van ${l.naam || 'deze persoon'} definitief wilt verwijderen? Dit kan niet ongedaan gemaakt worden.`)) return;
+  if(window.leadSync) window.leadSync.deleteLead(l.id);
+  // lokaal alvast verwijderen zodat het meteen weg is (Firestore-listener bevestigt het daarna)
+  alleLeads = alleLeads.filter(x=>x.id !== l.id);
+  actieveIdx = null; gesprekOpen = null;
+  document.getElementById('detail').classList.remove('show');
+  renderAlles();
+}
+
+// bouwt het statusgedeelte van het detailpaneel op
+function renderStatusBlok(idx, l){
+  const st = leadStatus(l);
+  const stInfo = STATUS[st] || STATUS.nieuw;
+  const heeftAfspraak = afspraakGemaakt(l);
+
+  // knop-helper
+  const knop = (status, label) => {
+    const k = STATUS[status];
+    return `<button onclick="kiesStatus(${idx}, '${status}')"><span class="kdot" style="background:${k.kleur}"></span>${label}</button>`;
+  };
+
+  const heeftStatus = st !== 'nieuw' || heeftAfspraak;
+  let chip = st === 'nieuw' ? '' :
+    `<div class="statusrij">
+       <div class="statuschip" style="background:${stInfo.kleur}"><span class="cdot"></span>${stInfo.label}</div>
+       <button class="terugknop" onclick="resetStatus(${idx})">&#8634; Status wijzigen</button>
+     </div>
+     ${st==='anders' && l.statusNotitie ? `<div class="statusnotitie">"${l.statusNotitie}"</div>` : ''}`;
+
+  let knoppen = '';
+  if(heeftAfspraak){
+    // vervolgopties nadat er een afspraak is
+    knoppen = `
+      <div class="status-heading">Vervolg na afspraak</div>
+      <div class="status-knoppen">
+        ${knop('deal','Deal geclosed')}
+        ${knop('open_offerte','Open offerte')}
+        ${knop('geen_interesse','Geen interesse')}
+        ${knop('anders','Anders')}
+      </div>`;
+  } else if(st !== 'nieuw' || gesprekOpen === idx){
+    // eerste uitkomst van het gesprek
+    knoppen = `
+      <div class="status-heading">Uitkomst van het gesprek</div>
+      <div class="status-knoppen">
+        ${knop('afspraak','Afspraak ingepland')}
+        ${knop('geen_interesse','Geen interesse')}
+        ${knop('anders','Anders')}
+      </div>`;
+  } else {
+    // nog niet gebeld: eerst de knop om de opties te tonen
+    knoppen = `<div class="status-knoppen"><button style="min-width:100%;" onclick="openGesprek(${idx})">Markeer als gebeld</button></div>`;
+  }
+
+  return `
+    <div class="statusblok">
+      ${chip}
+      ${knoppen}
+      <div class="anders-invoer" id="andersInvoer">
+        <input id="andersTekst" placeholder="Bijv. terugbellen volgende week" onkeydown="if(event.key==='Enter') bevestigAnders(${idx})">
+        <button onclick="bevestigAnders(${idx})">Opslaan</button>
+      </div>
+    </div>`;
+}
+
+function openGesprek(idx){
+  gesprekOpen = idx;
+  toonDetail(idx);
+}
+
+function kiesStatus(idx, status){
+  if(status === 'anders'){
+    // toon het tekstveld i.p.v. meteen op te slaan
+    const inv = document.getElementById('andersInvoer');
+    if(inv){ inv.classList.add('show'); const t=document.getElementById('andersTekst'); if(t){ t.value = alleLeads[idx].statusNotitie || ''; t.focus(); } }
+    return;
+  }
+  setStatus(idx, status);
+}
+
+function bevestigAnders(idx){
+  const t = document.getElementById('andersTekst');
+  setStatus(idx, 'anders', t ? t.value.trim() : '');
+}
+
+function setStatus(idx, status, notitie){
+  const l = alleLeads[idx];
+  if(!l) return;
+  const velden = { status };
+  if(status === 'afspraak') velden.afspraakGemaakt = true;
+  velden.statusNotitie = (status === 'anders') ? (notitie || '') : '';
+  if(window.leadSync) window.leadSync.updateLead(l.id, velden);
+  Object.assign(l, velden);
+  gesprekOpen = null;
+  renderAlles();
+  toonDetail(idx);
+}
+
+// zet een lead terug naar het begin en toont meteen de gespreksopties,
+// zodat je een verkeerd gekozen status opnieuw kunt bepalen
+function resetStatus(idx){
+  const l = alleLeads[idx];
+  if(!l) return;
+  const velden = { status:'nieuw', afspraakGemaakt:false, statusNotitie:'' };
+  if(window.leadSync) window.leadSync.updateLead(l.id, velden);
+  Object.assign(l, velden);
+  gesprekOpen = idx;
+  renderAlles();
+  toonDetail(idx);
+}
+
+function sluitDetail(){
+  actieveIdx = null;
+  gesprekOpen = null;
+  document.getElementById('detail').classList.remove('show');
+  renderAlles();
+}
+</script>
+
+<script type="module">
+/* ══════════════════════════════════════════════════════════════
+   FIREBASE — login + live leads uit Firestore. Er gaat geen enkele
+   locatie naar een externe kaartdienst; de kaart is zelf getekend.
+══════════════════════════════════════════════════════════════ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBRKjRQLImc4Aw8TIkhzuesnIowETybOOg",
+  authDomain: "salderingscheck.firebaseapp.com",
+  projectId: "salderingscheck",
+  storageBucket: "salderingscheck.firebasestorage.app",
+  messagingSenderId: "730797630902",
+  appId: "1:730797630902:web:8ac39836ee03fa1f974d17"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+window.adminLogin = (email, pass)=> signInWithEmailAndPassword(auth, email, pass);
+onAuthStateChanged(auth, user=>{ if(user && typeof opIngelogd === 'function') opIngelogd(); });
+
+window.leadSync = {
+  watchLeads(callback){
+    const q = query(collection(db, 'leads'), orderBy('tijd', 'asc'));
+    onSnapshot(q, snap=>{
+      const leads = [];
+      snap.forEach(d=>leads.push({ id:d.id, ...d.data() }));
+      callback(leads);
+    }, err=>console.error('watchLeads faalde:', err));
+  },
+  async updateLead(id, velden){
+    try{ await updateDoc(doc(db, 'leads', id), velden); }
+    catch(e){ console.error('updateLead faalde:', e); }
+  },
+  async deleteLead(id){
+    try{ await deleteDoc(doc(db, 'leads', id)); }
+    catch(e){ console.error('deleteLead faalde:', e); }
+  }
+};
+window.dispatchEvent(new Event('leadsync-ready'));
+
+// service worker registreren zodat de kaart als app installeerbaar is (alleen via https)
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

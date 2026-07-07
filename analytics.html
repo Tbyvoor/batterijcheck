@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BatterijCheck — Analytics (intern)</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root{
+    --bg:#0f1320; --surface:#171c2c; --surface-2:#1e2438; --border:#2a3148;
+    --text1:#eef0f6; --text2:#b3b9d1; --text3:#7c84a0;
+    --solar:#ffb300; --good:#12b981; --lose:#ff5a5f;
+    --fd:system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; }
+  body{ font-family:var(--fd); background:var(--bg); color:var(--text1); }
+
+  #gate{ position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; }
+  #gate .box{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:340px; text-align:center; }
+  #gate h1{ font-size:18px; margin-bottom:4px; }
+  #gate p{ font-size:13px; color:var(--text2); margin-bottom:16px; }
+  #gate input{ width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text1); font-size:16px; text-align:center; letter-spacing:2px; }
+  #gate button{ width:100%; margin-top:12px; padding:12px; border-radius:10px; border:none; background:var(--solar); color:#231600; font-weight:700; font-size:15px; cursor:pointer; }
+  #gate .err{ color:var(--lose); font-size:12.5px; margin-top:10px; display:none; }
+
+  #main{ display:none; max-width:640px; margin:0 auto; padding:24px 18px 60px; }
+  header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  header h1{ font-size:19px; }
+  header a{ font-size:12.5px; color:var(--solar); text-decoration:none; }
+  .subtitle{ font-size:13px; color:var(--text3); margin-bottom:24px; }
+
+  .kpis{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:26px; }
+  .kpi{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
+  .kpi b{ display:block; font-size:30px; font-weight:800; letter-spacing:-.5px; font-variant-numeric:tabular-nums; }
+  .kpi span{ font-size:12.5px; color:var(--text2); }
+  .kpi.hi b{ color:var(--good); }
+
+  h2{ font-size:14px; color:var(--text2); margin:0 0 14px; font-weight:600; }
+  .funnel{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:8px 4px; }
+  .frow{ display:flex; align-items:center; gap:14px; padding:12px 16px; }
+  .frow .lbl{ flex-shrink:0; width:130px; font-size:13.5px; }
+  .frow .barwrap{ flex:1; height:26px; background:var(--surface-2); border-radius:7px; overflow:hidden; position:relative; }
+  .frow .bar{ height:100%; background:linear-gradient(90deg, var(--solar), #ffd24d); border-radius:7px; min-width:2px; transition:width .5s; }
+  .frow .val{ flex-shrink:0; width:110px; text-align:right; font-size:13px; font-variant-numeric:tabular-nums; }
+  .frow .val b{ color:var(--text1); }
+  .frow .val span{ color:var(--text3); font-size:11.5px; }
+  .drop{ font-size:11.5px; color:var(--lose); padding:2px 16px 12px 160px; }
+
+  .tools{ margin-top:26px; display:flex; gap:10px; }
+  .tools button{ flex:1; padding:11px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text2); font-size:13px; cursor:pointer; }
+  .tools button.danger{ color:var(--lose); border-color:rgba(255,90,95,.3); }
+  .empty{ text-align:center; color:var(--text3); font-size:13.5px; padding:40px 10px; }
+  .note{ font-size:11.5px; color:var(--text3); margin-top:22px; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="box">
+    <h1>&#128274; BatterijCheck — Analytics</h1>
+    <p>Log in met je beheerdersaccount.</p>
+    <input id="gateEmail" type="email" placeholder="E-mailadres" autocomplete="username" style="margin-bottom:8px; text-align:left; letter-spacing:normal;">
+    <input id="gatePass" type="password" placeholder="Wachtwoord" autocomplete="current-password" style="text-align:left; letter-spacing:normal;">
+    <button onclick="probeerLogin()">Inloggen</button>
+    <div class="err" id="gateErr">Inloggen mislukt, controleer je gegevens.</div>
+  </div>
+</div>
+
+<div id="main">
+  <header>
+    <h1>Funnel-analyse</h1>
+    <a href="kaart.html">→ Naar leadkaart</a>
+  </header>
+  <p class="subtitle">Gebundelde cijfers van álle bezoekers. Zo zie je waar mensen afhaken.</p>
+  <div id="inhoud"></div>
+</div>
+
+<script>
+function probeerLogin(){
+  const email = document.getElementById('gateEmail').value.trim();
+  const pass = document.getElementById('gatePass').value;
+  document.getElementById('gateErr').style.display = 'none';
+  if(window.adminLogin){
+    window.adminLogin(email, pass).catch(()=>{ document.getElementById('gateErr').style.display = 'block'; });
+  }
+}
+document.getElementById('gatePass').addEventListener('keydown', e=>{ if(e.key==='Enter') probeerLogin(); });
+function opIngelogd(){
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  if(window.laadAnalytics) window.laadAnalytics();
+}
+
+// De trechterstappen in volgorde, met leesbare labels
+const STAPPEN = [
+  ['bezoek', 'Bezoekers'],
+  ['berekend', 'Verlies berekend'],
+  ['piekdag_geopend', 'Batterij-vraag'],
+  ['formulier_bereikt', 'Bij formulier'],
+  ['lead', 'Lead achtergelaten']
+];
+
+function render(data){
+  const inhoud = document.getElementById('inhoud');
+  const bezoek = data.bezoek || 0;
+
+  if(!bezoek){
+    inhoud.innerHTML = '<div class="empty">Nog geen data. Zodra bezoekers de site doorlopen, verschijnen de cijfers hier.</div>';
+    return;
+  }
+
+  const leads = data.lead || 0;
+  const conversie = bezoek ? (leads / bezoek * 100) : 0;
+
+  let html = `
+    <div class="kpis">
+      <div class="kpi"><b>${bezoek.toLocaleString('nl-NL')}</b><span>Bezoekers</span></div>
+      <div class="kpi hi"><b>${leads.toLocaleString('nl-NL')}</b><span>Leads</span></div>
+      <div class="kpi"><b>${conversie.toFixed(1)}%</b><span>Conversie (lead ÷ bezoek)</span></div>
+      <div class="kpi"><b>${(data.berekend || 0).toLocaleString('nl-NL')}</b><span>Berekeningen gemaakt</span></div>
+    </div>
+    <h2>De trechter — waar haken mensen af?</h2>
+    <div class="funnel">`;
+
+  let vorige = bezoek;
+  STAPPEN.forEach((s, i)=>{
+    const n = data[s[0]] || 0;
+    const pctVanBezoek = bezoek ? Math.round(n / bezoek * 100) : 0;
+    const pctVanVorige = vorige ? Math.round(n / vorige * 100) : 0;
+    html += `
+      <div class="frow">
+        <div class="lbl">${s[1]}</div>
+        <div class="barwrap"><div class="bar" style="width:${pctVanBezoek}%;"></div></div>
+        <div class="val"><b>${n.toLocaleString('nl-NL')}</b> <span>(${pctVanBezoek}%)</span></div>
+      </div>`;
+    // toon uitval t.o.v. de vorige stap
+    if(i > 0 && vorige > 0){
+      const uitval = vorige - n;
+      const uitvalPct = Math.round(uitval / vorige * 100);
+      if(uitval > 0) html += `<div class="drop">↓ ${uitval.toLocaleString('nl-NL')} afgehaakt sinds vorige stap (−${uitvalPct}%)</div>`;
+    }
+    vorige = n;
+  });
+
+  html += `</div>
+    <p class="note">Deze cijfers zijn gebundeld over álle bezoekers (live uit de database). Ze verversen automatisch.</p>`;
+
+  inhoud.innerHTML = html;
+}
+</script>
+
+<script type="module">
+/* ══════════════════════════════════════════════════════════════
+   FIREBASE — login + live gebundelde funnel-cijfers uit Firestore.
+══════════════════════════════════════════════════════════════ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBRKjRQLImc4Aw8TIkhzuesnIowETybOOg",
+  authDomain: "salderingscheck.firebaseapp.com",
+  projectId: "salderingscheck",
+  storageBucket: "salderingscheck.firebasestorage.app",
+  messagingSenderId: "730797630902",
+  appId: "1:730797630902:web:8ac39836ee03fa1f974d17"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+window.adminLogin = (email, pass)=> signInWithEmailAndPassword(auth, email, pass);
+onAuthStateChanged(auth, user=>{ if(user && typeof opIngelogd === 'function') opIngelogd(); });
+
+// live meeluisteren met het gebundelde funnel-document
+window.laadAnalytics = function(){
+  onSnapshot(doc(db, 'analytics', 'funnel'), snap=>{
+    render(snap.exists() ? snap.data() : {});
+  }, err=>console.error('analytics laden faalde:', err));
+};
+</script>
+</body>
+</html>

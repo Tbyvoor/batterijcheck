@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wat kost de salderingsstop jou? — Bereken het gratis</title>
+<meta name="description" content="Vanaf 1 januari 2027 stopt de salderingsregeling. Bereken in 30 seconden wat dit jou per jaar kost en hoe een thuisbatterij dat grotendeels voorkomt.">
+<meta name="theme-color" content="#0d1526">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0d1526;          /* nacht-navy: donkere secties */
+    --ink-2:#152036;        /* iets lichter navy */
+    --paper:#eef1f6;        /* koele lichte body-achtergrond */
+    --surface:#ffffff;
+    --surface-2:#f5f7fb;
+    --border:#dde3ec;
+    --border-ink:rgba(255,255,255,.12);
+    --text1:#0f1a30;
+    --text2:#47536b;
+    --text3:#8b97ac;
+    --on-ink:#eef2f9;
+    --on-ink-dim:#9fb0cc;
+    --solar:#ffb300;        /* accent: zon-amber */
+    --solar-deep:#e08c00;
+    --keep:#12b981;         /* wat je houdt (groen) */
+    --keep-bg:#e2f7ef;
+    --lose:#ff5a5f;         /* wat je verliest (koraal) */
+    --lose-bg:#ffe9ea;
+    --radius:16px;
+    --radius-lg:24px;
+    --shadow:0 2px 4px rgba(13,21,38,.04), 0 18px 40px -24px rgba(13,21,38,.35);
+    --shadow-lg:0 8px 24px -8px rgba(13,21,38,.18), 0 40px 80px -40px rgba(13,21,38,.5);
+    --fd:"Archivo", system-ui, sans-serif;
+    --fb:"Figtree", system-ui, sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body{ font-family:var(--fb); background:var(--paper); color:var(--text1); line-height:1.55; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } *{ animation:none !important; transition:none !important; } }
+  a{ color:inherit; }
+  .wrap{ width:100%; max-width:1080px; margin:0 auto; padding:0 22px; }
+  .tnum{ font-variant-numeric:tabular-nums; }
+
+  /* ── Topbalk ── */
+  .topbar{ position:sticky; top:0; z-index:50; background:rgba(13,21,38,.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--border-ink); }
+  .topbar .wrap{ display:flex; align-items:center; justify-content:space-between; height:60px; }
+  .logo{ display:flex; align-items:center; gap:9px; font-family:var(--fd); font-weight:800; font-size:18px; letter-spacing:-.4px; color:var(--on-ink); }
+  .logo .spark{ width:26px; height:26px; }
+  .count-chip{ display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--on-ink-dim); }
+  .count-chip b{ color:var(--solar); font-variant-numeric:tabular-nums; }
+  .count-chip svg{ width:15px; height:15px; opacity:.8; }
+  .topcta{ display:none; }
+  @media(min-width:720px){ .topcta{ display:inline-flex; align-items:center; gap:7px; background:var(--solar); color:#231600; font-family:var(--fd); font-weight:700; font-size:13.5px; padding:9px 16px; border-radius:10px; text-decoration:none; } }
+
+  /* ── Hero ── */
+  .hero{ position:relative; background:var(--ink); color:var(--on-ink); overflow:hidden; padding:52px 0 130px; }
+  .hero::before{ /* zon-gloed rechtsboven */
+    content:""; position:absolute; top:-180px; right:-120px; width:520px; height:520px;
+    background:radial-gradient(circle, rgba(255,179,0,.32), rgba(255,179,0,0) 62%); pointer-events:none;
+  }
+  .hero::after{ /* fijn grid-motief (het net) */
+    content:""; position:absolute; inset:0; opacity:.5; pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size:38px 38px; mask-image:linear-gradient(180deg, #000, transparent 75%);
+  }
+  .hero .wrap{ position:relative; z-index:2; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--solar); background:rgba(255,179,0,.1); border:1px solid rgba(255,179,0,.28); padding:6px 13px; border-radius:100px; }
+  .eyebrow .dot{ width:7px; height:7px; border-radius:50%; background:var(--solar); box-shadow:0 0 0 0 rgba(255,179,0,.6); animation:pulse 2.2s infinite; }
+  @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(255,179,0,.5);} 70%{box-shadow:0 0 0 8px rgba(255,179,0,0);} 100%{box-shadow:0 0 0 0 rgba(255,179,0,0);} }
+  .hero h1{ font-family:var(--fd); font-weight:800; font-size:clamp(30px, 6vw, 52px); line-height:1.04; letter-spacing:-1.4px; margin:20px 0 0; max-width:15ch; text-wrap:balance; }
+  .hero h1 .hl{ color:var(--solar); }
+  .hero .lede{ font-size:clamp(16px,2.2vw,19px); color:var(--on-ink-dim); max-width:46ch; margin-top:18px; line-height:1.5; }
+  .hero-badges{ display:flex; flex-wrap:wrap; gap:18px; margin-top:24px; }
+  .hero-badges span{ display:inline-flex; align-items:center; gap:8px; font-size:13.5px; color:var(--on-ink-dim); font-weight:500; }
+  .hero-badges svg{ width:17px; height:17px; color:var(--keep); flex-shrink:0; }
+
+  /* ── Rekenkaart (overlapt hero → body) ── */
+  .calc-anchor{ margin-top:-92px; position:relative; z-index:5; }
+  .calc{ background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); overflow:hidden; }
+  .calc-grid{ display:grid; grid-template-columns:1fr; }
+  @media(min-width:780px){ .calc-grid{ grid-template-columns:1fr 1fr; } }
+  .calc-form{ padding:30px 28px; }
+  .calc-form .kicker{ font-family:var(--fd); font-weight:700; font-size:12.5px; letter-spacing:.4px; text-transform:uppercase; color:var(--solar-deep); }
+  .calc-form h2{ font-family:var(--fd); font-weight:800; font-size:24px; letter-spacing:-.6px; margin:5px 0 3px; }
+  .calc-form .note{ font-size:13.5px; color:var(--text2); margin-bottom:18px; }
+  label{ display:block; font-size:13.5px; font-weight:600; color:var(--text1); margin:18px 0 8px; }
+  label:first-of-type{ margin-top:0; }
+  .field{ position:relative; }
+  .field .unit{ position:absolute; right:15px; top:50%; transform:translateY(-50%); font-size:14px; color:var(--text3); pointer-events:none; }
+  input, select{ width:100%; font-family:inherit; font-size:16px; padding:13px 15px; border-radius:12px; border:1.6px solid var(--border); background:var(--surface-2); color:var(--text1); transition:border-color .14s, background .14s; }
+  input:focus, select:focus{ outline:none; border-color:var(--solar); background:var(--surface); box-shadow:0 0 0 4px rgba(255,179,0,.14); }
+  .chips{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; }
+  .chip{ padding:13px 8px; border-radius:12px; border:1.6px solid var(--border); background:var(--surface-2); text-align:center; cursor:pointer; transition:.14s; }
+  .chip .ct{ font-family:var(--fd); font-weight:700; font-size:14px; display:block; }
+  .chip .cs{ font-size:11.5px; color:var(--text3); margin-top:2px; display:block; }
+  .chip:hover{ border-color:var(--text3); }
+  .chip.active{ background:var(--ink); border-color:var(--ink); }
+  .chip.active .ct{ color:#fff; }
+  .chip.active .cs{ color:var(--on-ink-dim); }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:9px; width:100%; font-family:var(--fd); font-weight:700; font-size:16px; padding:15px 20px; border:none; border-radius:13px; cursor:pointer; transition:filter .14s, transform .06s; }
+  .btn:active{ transform:translateY(1px); }
+  .btn-solar{ background:var(--solar); color:#231600; box-shadow:0 6px 18px -6px rgba(255,179,0,.6); }
+  .btn-solar:hover{ filter:brightness(1.05); }
+  .btn-ink{ background:var(--ink); color:#fff; }
+  .btn-ink:hover{ filter:brightness(1.35); }
+  .btn:disabled{ opacity:.4; cursor:default; box-shadow:none; }
+  .btn svg{ width:18px; height:18px; }
+  .calc-form .btn{ margin-top:22px; }
+
+  /* ── Meter-uitlezing (resultaat) ── */
+  .calc-result{ background:var(--ink); color:var(--on-ink); padding:30px 28px; display:flex; flex-direction:column; justify-content:center; position:relative; }
+  .calc-result::before{ content:""; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, rgba(255,179,0,.5), transparent); }
+  .result-empty{ text-align:center; color:var(--on-ink-dim); }
+  .result-empty svg{ width:42px; height:42px; color:var(--solar); opacity:.55; margin-bottom:12px; }
+  .result-empty p{ font-size:14px; max-width:24ch; margin:0 auto; }
+  .meter-label{ font-size:12.5px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; color:var(--on-ink-dim); }
+  .meter-big{ font-family:var(--fd); font-weight:900; font-size:clamp(48px,9vw,72px); line-height:1; letter-spacing:-2px; color:var(--lose); font-variant-numeric:tabular-nums; margin:6px 0 2px; text-shadow:0 0 32px rgba(255,90,95,.25); }
+  .meter-sub{ font-size:14px; color:var(--on-ink-dim); }
+  .meter-cumul{ margin-top:18px; padding:14px 16px; background:rgba(255,90,95,.1); border:1px solid rgba(255,90,95,.24); border-radius:12px; font-size:14px; line-height:1.45; }
+  .meter-cumul b{ font-family:var(--fd); font-size:18px; color:#ff8589; }
+  .meter-rows{ display:flex; gap:20px; margin-top:18px; padding-top:16px; border-top:1px solid var(--border-ink); }
+  .meter-rows div{ flex:1; }
+  .meter-rows b{ display:block; font-family:var(--fd); font-weight:700; font-size:19px; color:var(--on-ink); }
+  .meter-rows span{ font-size:12px; color:var(--on-ink-dim); }
+  .calc-result .btn{ margin-top:22px; }
+
+  /* ── Stappenindicator (verbindt de 3 funnel-stappen) ── */
+  .stepper{ display:flex; align-items:center; gap:6px; margin-bottom:16px; }
+  .stepper .sdot{ height:6px; border-radius:99px; flex:1; background:var(--border); max-width:44px; }
+  .stepper .sdot.on{ background:var(--solar); }
+  .stepper .slbl{ font-family:var(--fd); font-size:11.5px; font-weight:700; color:var(--text3); letter-spacing:.5px; text-transform:uppercase; margin-left:6px; white-space:nowrap; }
+  .calc-result .stepper .sdot{ background:var(--border-ink); }
+  .calc-result .stepper .sdot.on{ background:var(--solar); }
+  .calc-result .stepper .slbl{ color:var(--on-ink-dim); }
+
+  /* ── Schatting-invulknop (haalt frictie weg bij de piekdag-vraag) ── */
+  .btn-ghost{ background:transparent; border:1.5px dashed rgba(255,179,0,.5); color:var(--solar); font-family:var(--fd); font-weight:600; font-size:13.5px; padding:10px 14px; border-radius:11px; cursor:pointer; width:100%; margin-top:10px; transition:background .14s; }
+  .btn-ghost:hover{ background:rgba(255,179,0,.08); }
+
+  /* ── "Je advies staat klaar"-banner boven het formulier ── */
+  .lock-banner{ display:flex; align-items:center; gap:11px; background:var(--surface-2); border:1px dashed var(--border); border-radius:12px; padding:12px 15px; margin-bottom:18px; font-size:13px; color:var(--text2); line-height:1.45; }
+  .lock-banner svg{ width:17px; height:17px; color:var(--solar-deep); flex-shrink:0; }
+  .lock-banner b{ color:var(--text1); }
+
+  /* ── Batterij-onthulling (na het formulier) ── */
+  .bat-panel{ margin-top:20px; background:var(--surface-2); border:1px solid var(--border); border-radius:16px; padding:26px 20px; text-align:center; }
+  .bat-visual{ display:flex; align-items:center; justify-content:center; margin:4px auto 0; }
+  .bat-body{ position:relative; display:flex; gap:5px; width:186px; height:78px; padding:9px; border:4px solid var(--ink); border-radius:15px; background:var(--surface); }
+  .bat-term{ width:9px; height:28px; background:var(--ink); border-radius:0 5px 5px 0; margin-left:-1px; }
+  .bat-seg{ flex:1; border-radius:6px; background:var(--border); transition:background .3s ease, box-shadow .3s ease; }
+  .bat-seg.on{ background:linear-gradient(180deg, #ffd869, var(--solar)); box-shadow:0 0 14px rgba(255,179,0,.6); }
+  .bat-bolt{ position:absolute; inset:0; margin:auto; width:34px; height:34px; color:var(--ink); opacity:0; transform:scale(.6); transition:opacity .35s ease, transform .35s cubic-bezier(.2,1.4,.4,1); filter:drop-shadow(0 0 5px rgba(255,255,255,.8)); }
+  .bat-bolt.on{ opacity:1; transform:scale(1); }
+  .bat-body.full{ animation:batGlow 2.6s ease-in-out infinite; }
+  @keyframes batGlow{ 0%,100%{ box-shadow:0 0 0 0 rgba(255,179,0,0); } 50%{ box-shadow:0 0 26px -2px rgba(255,179,0,.45); } }
+  @media (prefers-reduced-motion: reduce){ .bat-seg, .bat-bolt{ transition:none; } .bat-body.full{ animation:none; } }
+  .bat-kwh{ font-family:var(--fd); font-weight:900; font-size:38px; letter-spacing:-1px; margin-top:18px; color:var(--text1); }
+  .bat-kwh span{ font-size:18px; color:var(--text2); font-weight:700; }
+  .bat-tag{ display:inline-block; font-family:var(--fd); font-weight:700; font-size:11.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--solar-deep); background:rgba(255,179,0,.14); border-radius:99px; padding:5px 13px; margin-bottom:14px; }
+  .bat-note{ font-size:13.5px; color:var(--text2); margin-top:10px; line-height:1.55; max-width:38ch; margin-left:auto; margin-right:auto; }
+
+  /* ── Voordelen-kaarten (i.p.v. reviews) ── */
+  .benefit .q-ico{ width:42px; height:42px; border-radius:11px; background:var(--ink); display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+  .benefit .q-ico svg{ width:21px; height:21px; color:var(--solar); }
+  .benefit h3{ font-family:var(--fd); font-weight:700; font-size:16.5px; letter-spacing:-.2px; margin-bottom:6px; }
+
+  /* ── Zachte scroll-reveal ── */
+  .io-fade{ opacity:0; transform:translateY(14px); transition:opacity .55s ease, transform .55s ease; }
+  .io-fade.in{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){ .io-fade{ opacity:1; transform:none; transition:none; } }
+
+  /* ── Piekdag-vraag (tussenstap vóór het batterij-advies) ── */
+  .piekdag{ margin-top:16px; padding:18px 17px; background:rgba(255,255,255,.06); border:1px solid var(--border-ink); border-radius:12px; }
+  .piekdag label{ color:var(--on-ink); font-size:14px; margin-top:0; }
+  .piekdag-hint{ font-size:12px; color:var(--on-ink-dim); margin:9px 0 14px; line-height:1.5; }
+  .piekdag-hint b{ color:var(--solar); }
+  .piekdag .field .unit{ color:var(--text3); }
+
+  /* ── "Nog te ontdekken"-teaser (vervaagd tot na het formulier) ── */
+  .teaser{ margin-top:18px; padding:16px 17px; background:rgba(255,179,0,.08); border:1px dashed rgba(255,179,0,.35); border-radius:12px; }
+  .teaser-head{ display:flex; align-items:center; gap:8px; font-family:var(--fd); font-weight:700; font-size:13px; color:var(--solar); text-transform:uppercase; letter-spacing:.3px; }
+  .teaser-head svg{ width:15px; height:15px; }
+  .teaser-rows{ margin-top:12px; display:flex; flex-direction:column; gap:9px; }
+  .teaser-rows > div{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13.5px; color:var(--on-ink-dim); }
+  .teaser-rows b{ font-family:var(--fd); font-weight:700; color:var(--on-ink); font-size:14.5px; }
+  .teaser-rows b.blur{ filter:blur(5px); user-select:none; }
+  .teaser-note{ font-size:12px; color:var(--on-ink-dim); margin-top:12px; line-height:1.5; }
+  .teaser.unlocked{ background:rgba(18,185,129,.08); border:1px solid rgba(18,185,129,.3); border-style:solid; }
+  .teaser.unlocked .teaser-head{ color:var(--keep); }
+  .teaser.unlocked .teaser-rows b.blur{ filter:none; }
+  .teaser.unlocked .teaser-note{ color:#5fe0a8; }
+
+  /* ── Laadstatus op de bereken-knop ── */
+  .spin{ width:18px; height:18px; border:2.5px solid rgba(35,22,0,.25); border-top-color:#231600; border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ── Secties ── */
+  section{ padding:64px 0; }
+  .sec-head{ max-width:32ch; }
+  .sec-tag{ font-family:var(--fd); font-weight:700; font-size:12.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--solar-deep); }
+  .sec-head h2{ font-family:var(--fd); font-weight:800; font-size:clamp(26px,4vw,38px); letter-spacing:-1px; line-height:1.1; margin:8px 0 0; text-wrap:balance; }
+  .sec-head p{ color:var(--text2); font-size:16.5px; margin-top:12px; }
+
+  /* Oplossing (batterij) */
+  .solution{ background:var(--surface); }
+  .steps{ display:grid; grid-template-columns:1fr; gap:16px; margin-top:34px; }
+  @media(min-width:560px){ .steps{ grid-template-columns:repeat(2,1fr); } }
+  @media(min-width:980px){ .steps{ grid-template-columns:repeat(4,1fr); } }
+  .step{ background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:24px; }
+  .step .ico{ width:46px; height:46px; border-radius:12px; background:var(--ink); display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+  .step .ico svg{ width:24px; height:24px; color:var(--solar); }
+  .step h3{ font-family:var(--fd); font-weight:700; font-size:18px; letter-spacing:-.3px; }
+  .step p{ font-size:14.5px; color:var(--text2); margin-top:6px; }
+  .keep-line{ margin-top:28px; display:inline-flex; align-items:center; gap:10px; background:var(--keep-bg); color:#0a7d54; font-weight:600; font-size:15px; padding:13px 18px; border-radius:12px; }
+  .keep-line svg{ width:20px; height:20px; flex-shrink:0; }
+
+  /* Leadformulier */
+  .lead{ background:var(--ink); color:var(--on-ink); }
+  .lead-grid{ display:grid; grid-template-columns:1fr; gap:34px; align-items:start; }
+  @media(min-width:820px){ .lead-grid{ grid-template-columns:1fr 1.1fr; gap:52px; } }
+  .lead-copy h2{ font-family:var(--fd); font-weight:800; font-size:clamp(26px,4vw,38px); letter-spacing:-1px; line-height:1.1; text-wrap:balance; }
+  .lead-copy > p{ color:var(--on-ink-dim); font-size:16.5px; margin-top:14px; }
+  .howto{ margin-top:26px; display:flex; flex-direction:column; gap:2px; }
+  .howto .row{ display:flex; gap:15px; padding:14px 0; align-items:flex-start; }
+  .howto .row:not(:last-child){ border-bottom:1px solid var(--border-ink); }
+  .howto .num{ flex-shrink:0; width:30px; height:30px; border-radius:9px; background:rgba(255,179,0,.14); border:1px solid rgba(255,179,0,.3); color:var(--solar); font-family:var(--fd); font-weight:800; font-size:15px; display:flex; align-items:center; justify-content:center; }
+  .howto .row b{ font-family:var(--fd); font-weight:700; font-size:15.5px; color:var(--on-ink); }
+  .howto .row span{ display:block; font-size:13.5px; color:var(--on-ink-dim); margin-top:1px; }
+
+  .lead-card{ background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:28px; color:var(--text1); }
+  .lead-card h3{ font-family:var(--fd); font-weight:800; font-size:21px; letter-spacing:-.5px; }
+  .lead-card .sub{ font-size:14px; color:var(--text2); margin:4px 0 4px; }
+  .suggest-list{ border:1.6px solid var(--border); border-top:none; border-radius:0 0 12px 12px; margin-top:-6px; max-height:190px; overflow-y:auto; background:var(--surface); position:relative; z-index:5; }
+  .suggest-item{ padding:11px 15px; font-size:14px; cursor:pointer; border-bottom:1px solid var(--border); }
+  .suggest-item:last-child{ border-bottom:none; }
+  .suggest-item:hover{ background:var(--surface-2); }
+  .adres-ok{ display:none; margin-top:10px; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:#0a7d54; background:var(--keep-bg); padding:9px 13px; border-radius:10px; }
+  .tel-note{ font-size:12px; color:var(--text3); margin:6px 2px 0; line-height:1.5; }
+  .adres-ok svg{ width:16px; height:16px; flex-shrink:0; }
+  .consent{ display:flex; gap:11px; align-items:flex-start; margin-top:18px; cursor:pointer; }
+  .consent input{ width:19px; height:19px; margin-top:2px; flex-shrink:0; accent-color:var(--solar-deep); }
+  .consent span{ font-size:12.5px; color:var(--text2); line-height:1.5; }
+  .privacy-note{ display:flex; align-items:center; gap:8px; justify-content:center; font-size:12.5px; color:var(--text3); margin-top:14px; }
+  .privacy-note svg{ width:15px; height:15px; }
+
+  .thanks{ text-align:center; padding:14px 6px; }
+  .thanks .big{ width:64px; height:64px; margin:0 auto 14px; border-radius:50%; background:var(--keep-bg); display:flex; align-items:center; justify-content:center; }
+  .thanks .big svg{ width:34px; height:34px; color:var(--keep); }
+  .thanks h3{ font-family:var(--fd); font-weight:800; font-size:23px; }
+  .thanks p{ font-size:15px; color:var(--text2); margin-top:8px; max-width:34ch; margin-left:auto; margin-right:auto; }
+
+  /* Sociale bewijskracht */
+  .proof{ background:var(--surface); }
+  .proof-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; text-align:center; }
+  .proof-stats .st b{ font-family:var(--fd); font-weight:900; font-size:clamp(26px,5vw,40px); letter-spacing:-1px; color:var(--ink); display:block; }
+  .proof-stats .st span{ font-size:13px; color:var(--text2); }
+  .quotes{ display:grid; grid-template-columns:1fr; gap:16px; margin-top:40px; }
+  @media(min-width:720px){ .quotes{ grid-template-columns:repeat(3,1fr); } }
+  .quote{ background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
+  .quote .stars{ color:var(--solar); font-size:15px; letter-spacing:2px; }
+  .quote p{ font-size:14.5px; margin:10px 0 14px; line-height:1.5; }
+  .quote .who{ font-size:13px; color:var(--text3); font-weight:600; }
+
+  /* FAQ */
+  .faq{ background:var(--paper); }
+  .faq-list{ margin-top:30px; border-top:1px solid var(--border); }
+  details{ border-bottom:1px solid var(--border); }
+  summary{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 4px; cursor:pointer; font-family:var(--fd); font-weight:600; font-size:16.5px; list-style:none; }
+  summary::-webkit-details-marker{ display:none; }
+  summary .pm{ flex-shrink:0; width:24px; height:24px; position:relative; }
+  summary .pm::before, summary .pm::after{ content:""; position:absolute; background:var(--solar-deep); border-radius:2px; transition:.2s; }
+  summary .pm::before{ top:11px; left:4px; width:16px; height:2px; }
+  summary .pm::after{ top:4px; left:11px; width:2px; height:16px; }
+  details[open] summary .pm::after{ transform:rotate(90deg); opacity:0; }
+  details[open] summary{ color:var(--solar-deep); }
+  .faq-body{ padding:0 4px 22px; font-size:15px; color:var(--text2); line-height:1.6; max-width:64ch; }
+
+  /* Slot-CTA */
+  .final{ background:var(--ink); color:var(--on-ink); text-align:center; }
+  .final h2{ font-family:var(--fd); font-weight:800; font-size:clamp(26px,4.5vw,40px); letter-spacing:-1px; line-height:1.1; text-wrap:balance; max-width:20ch; margin:0 auto; }
+  .final p{ color:var(--on-ink-dim); margin:14px auto 26px; max-width:44ch; font-size:16.5px; }
+  .final .btn{ max-width:340px; margin:0 auto; }
+
+  footer{ background:var(--ink); color:var(--on-ink-dim); border-top:1px solid var(--border-ink); padding:34px 0; font-size:12.5px; line-height:1.7; }
+  footer .disc{ max-width:78ch; }
+  footer a{ color:var(--on-ink); }
+
+  .hidden{ display:none !important; }
+  :focus-visible{ outline:3px solid var(--solar); outline-offset:2px; border-radius:6px; }
+
+  @keyframes rise{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+  .reveal{ animation:rise .5s cubic-bezier(.2,.7,.3,1) both; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="logo">
+      <svg class="spark" viewBox="0 0 32 32" fill="none">
+        <rect x="1" y="1" width="30" height="30" rx="8" fill="#ffb300"/>
+        <path d="M17.5 6 L10 18 h5 l-1.5 8 L21 13 h-5 z" fill="#0d1526"/>
+      </svg>
+      <span>Salderings<span style="color:var(--solar);">check</span></span>
+    </div>
+    <div class="count-chip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      Nog <b id="countdown">—</b> dagen tot de saldering stopt
+    </div>
+    <a href="#rekentool" class="topcta">Welke batterij past bij mij?</a>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>Wetswijziging · 1 januari 2027</span>
+    <h1>Straks krijg je bijna <span class="hl">niets</span> meer voor je eigen zonnestroom.</h1>
+    <p class="lede">De salderingsregeling stopt definitief. Reken in 30 seconden uit wat dat jóú per jaar kost — en hoe je het grootste deel ervan houdt.</p>
+    <div class="hero-badges">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Gratis &amp; vrijblijvend</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Geen account nodig</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Berekening op basis van de nieuwe wet</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap calc-anchor" id="rekentool">
+  <div class="calc">
+    <div class="calc-grid">
+      <div class="calc-form">
+        <div class="stepper"><span class="sdot on"></span><span class="sdot"></span><span class="sdot"></span><span class="slbl">Stap 1 van 3</span></div>
+        <div class="kicker">Bereken je verlies</div>
+        <h2>Drie korte vragen.</h2>
+        <p class="note">Geen persoonsgegevens nodig voor de berekening.</p>
+
+        <label for="c_panelen">Hoeveel zonnepanelen heb je?</label>
+        <div class="field">
+          <input id="c_panelen" type="number" min="1" max="60" inputmode="numeric" placeholder="Bijv. 12">
+          <span class="unit">panelen</span>
+        </div>
+
+        <label>Hoeveel stroom verbruik je per jaar?</label>
+        <div class="chips" id="verbruikChips">
+          <div class="chip" data-val="2500"><span class="ct">Weinig</span><span class="cs">± 2.500 kWh</span></div>
+          <div class="chip active" data-val="3500"><span class="ct">Gemiddeld</span><span class="cs">± 3.500 kWh</span></div>
+          <div class="chip" data-val="5000"><span class="ct">Veel</span><span class="cs">± 5.000 kWh</span></div>
+        </div>
+
+        <label>Ben je eigenaar van de woning?</label>
+        <div class="chips" id="eigenaarChips" style="grid-template-columns:1fr 1fr;">
+          <div class="chip active" data-val="ja"><span class="ct">Ja</span></div>
+          <div class="chip" data-val="nee"><span class="ct">Nee, huur</span></div>
+        </div>
+
+        <button class="btn btn-solar" id="calcBtn" onclick="berekenVerlies()">
+          <span id="calcBtnLabel">Bereken mijn verlies</span>
+          <svg id="calcBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="calc-result" id="resultPane">
+        <div class="result-empty" id="resultEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+          <p>Vul je gegevens in en zie meteen wat de salderingsstop jou kost.</p>
+        </div>
+        <div id="resultFilled" class="hidden">
+          <div class="meter-label">Geschat verlies vanaf 2027</div>
+          <div class="meter-big tnum" id="resAmount">€0</div>
+          <div class="meter-sub">per jaar, aan gemiste teruglevering</div>
+          <div class="meter-cumul">Blijft het zo, dan loop je <b class="tnum" id="resCumul">€0</b> mis over de eerste 10 jaar.</div>
+          <div class="meter-rows">
+            <div><b class="tnum" id="resOpwek">0</b><span>kWh die je opwekt/jaar</span></div>
+            <div><b class="tnum" id="resSurplus">0</b><span>kWh die je teruglevert</span></div>
+          </div>
+
+          <div class="piekdag hidden" id="piekdagBlok">
+            <div class="stepper"><span class="sdot on"></span><span class="sdot on"></span><span class="sdot"></span><span class="slbl">Stap 2 van 3</span></div>
+            <label for="p_piekdag">Wat is je hoogste teruglevering op één dag?</label>
+            <div class="field">
+              <input id="p_piekdag" type="number" min="1" step="0.1" inputmode="decimal" placeholder="Bijv. 12">
+              <span class="unit">kWh</span>
+            </div>
+            <p class="piekdag-hint">Dit zie je in de app van je zonnepanelen of omvormer (bijv. Enphase, SolarEdge, GoodWe) — kijk bij je dag-teruglevering en pak de hoogste dag. Ook je energieleverancier-app toont dit vaak bij "teruglevering per dag".</p>
+            <button class="btn-ghost" onclick="gebruikSchatting()">Weet je het niet precies? Gebruik onze schatting: <b id="piekdagSchatting">—</b> kWh</button>
+            <button class="btn btn-ink" style="margin-top:10px;" onclick="toonLeadForm()">
+              Bekijk mijn batterij-advies →
+            </button>
+          </div>
+
+          <div class="teaser hidden" id="teaserCard">
+            <div class="teaser-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              Jouw batterij-advies
+            </div>
+            <div class="teaser-rows">
+              <div><span>Aanbevolen batterijcapaciteit</span><b class="blur" id="teaserCapaciteit">≈ XX kWh</b></div>
+            </div>
+            <p class="teaser-note" id="teaserNote">Rond stap 3 af om te zien welke batterij bij jouw teruglevering past.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="solution">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">De oplossing</div>
+      <h2>Een thuisbatterij draait het verlies om.</h2>
+      <p>Overdag bewaar je je opgewekte stroom in de batterij, en 's avonds gebruik je 'm zelf. Zo lever je veel minder terug tegen dat lage tarief — en houd je je opbrengst grotendeels in eigen zak.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></div>
+        <h3>Overdag opslaan</h3>
+        <p>De stroom die je nu bijna gratis weggeeft, laad je op in je batterij.</p>
+      </div>
+      <div class="step">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="15" height="12" rx="2"/><path d="M19 12h2v4h-2M8 4v4M13 4v4"/></svg></div>
+        <h3>'s Avonds gebruiken</h3>
+        <p>Als je thuiskomt gebruik je je eigen stroom, in plaats van dure stroom in te kopen.</p>
+      </div>
+      <div class="step">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h3>Minder terugleveren</h3>
+        <p>Minder teruglevering tegen het lage tarief betekent: je verlies verdampt grotendeels.</p>
+      </div>
+      <div class="step">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 7-8"/><path d="M17 4h4v4"/><path d="M4 21h16"/></svg></div>
+        <h3>Slim handelen in stroom</h3>
+        <p>Met een dynamisch contract laadt je batterij op als stroom goedkoop is en levert 'ie terug als de prijs hoog is. Zo verdien je aan het prijsverschil — bovenop je besparing.</p>
+      </div>
+    </div>
+    <div class="keep-line">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      Een adviseur rekent gratis voor je uit wat een batterij in jóúw situatie oplevert.
+    </div>
+  </div>
+</section>
+
+<section class="lead hidden" id="advies">
+  <div class="wrap">
+    <div class="lead-grid">
+      <div class="lead-copy">
+        <h2>Nog één stap tot je advies.</h2>
+        <p>Vul je gegevens in en zie direct welke batterijcapaciteit bij jouw teruglevering past. Vrijblijvend — je zit nergens aan vast.</p>
+        <div class="howto">
+          <div class="row"><div class="num">1</div><div><b>Je vult je gegevens in</b><span>Duurt 20 seconden, geen verplichtingen.</span></div></div>
+          <div class="row"><div class="num">2</div><div><b>Je ziet direct welke batterij bij je past</b><span>Op basis van je eigen teruglevering.</span></div></div>
+          <div class="row"><div class="num">3</div><div><b>Zonder verplichtingen</b><span>Jij beslist zelf wat je met het advies doet.</span></div></div>
+        </div>
+      </div>
+
+      <div class="lead-card" id="leadCardWrap">
+        <div id="leadForm">
+          <div class="lock-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <span><b>Je batterij-advies staat klaar.</b> Het wordt direct getoond zodra je deze laatste stap afrondt.</span>
+          </div>
+          <h3>Ontdek welke batterij bij jou past</h3>
+          <p class="sub">Vul je gegevens in om te zien welke batterijcapaciteit past bij jouw teruglevering.</p>
+
+          <label for="l_telefoon" style="font-size:15px;">Telefoonnummer</label>
+          <input id="l_telefoon" type="tel" placeholder="06 12 34 56 78" autocomplete="tel" style="font-size:19px; font-weight:700; padding:15px 16px;">
+          <p class="tel-note">Met je telefoonnummer kunnen we je bellen voor vrijblijvend advies over een thuisbatterij.</p>
+
+          <label for="l_voornaam">Voornaam</label>
+          <input id="l_voornaam" placeholder="Voornaam" autocomplete="given-name">
+
+          <label for="l_achternaam">Achternaam</label>
+          <input id="l_achternaam" placeholder="Achternaam" autocomplete="family-name">
+
+          <label for="l_postcode">Postcode &amp; huisnummer</label>
+          <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:10px;">
+            <input id="l_postcode" placeholder="1234 AB" oninput="zoekAdres()" autocomplete="off">
+            <input id="l_huisnummer" type="text" placeholder="Huisnr." oninput="zoekAdres()" autocomplete="off">
+          </div>
+          <div id="adresSuggesties"></div>
+          <div class="adres-ok" id="adresBevestiging">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span id="adresTekst"></span>
+          </div>
+
+          <label class="consent">
+            <input type="checkbox" id="l_consent">
+            <span>Ik geef toestemming om <strong>een keer</strong> gebeld te worden voor vrijblijvend advies over een thuisbatterij.</span>
+          </label>
+
+          <button class="btn btn-solar" id="submitBtn" onclick="verstuurLead()" disabled style="margin-top:18px;">
+            Toon mijn batterij-advies
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <div class="privacy-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            We bellen alleen jou. Geen spam, je gegevens worden niet doorverkocht.
+          </div>
+        </div>
+
+        <div class="thanks hidden" id="thanksCard">
+          <div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <h3>Dit is jouw batterij-advies</h3>
+          <div class="bat-panel">
+            <div class="bat-tag">Aanbevolen voor jouw teruglevering</div>
+            <div class="bat-visual">
+              <div class="bat-body" id="batBody">
+                <div class="bat-seg"></div>
+                <div class="bat-seg"></div>
+                <div class="bat-seg"></div>
+                <div class="bat-seg"></div>
+                <div class="bat-seg"></div>
+                <svg class="bat-bolt" id="batBolt" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.2a.7.7 0 0 0 .56 1.1H10l-1.2 7.3a.4.4 0 0 0 .72.3l8.4-11.4a.7.7 0 0 0-.56-1.1H12.2l1.5-6.9a.4.4 0 0 0-.7-.3z"/></svg>
+              </div>
+              <div class="bat-term"></div>
+            </div>
+            <div class="bat-kwh tnum"><span id="batKwh">—</span> <span>kWh thuisbatterij</span></div>
+            <p class="bat-note" id="batNote">Groot genoeg om ook je zonnigste dag volledig op te vangen.</p>
+          </div>
+          <p style="margin-top:16px;">Vragen over deze batterij? We kunnen je vrijblijvend bellen met advies — je zit nergens aan vast.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="proof">
+  <div class="wrap">
+    <div class="proof-stats">
+      <div class="st"><b class="tnum">2027</b><span>Saldering stopt definitief</span></div>
+      <div class="st"><b class="tnum">2 min</b><span>Meer tijd kost het niet</span></div>
+      <div class="st"><b class="tnum">~70%</b><span>Van je opwek lever je nu terug</span></div>
+    </div>
+    <div class="quotes">
+      <div class="quote benefit">
+        <div class="q-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.9 12.6a.6.6 0 0 0 .5 1h5.1l-1 8 8.6-11.2a.6.6 0 0 0-.5-1h-5.2z"/></svg></div>
+        <h3>Direct resultaat</h3>
+        <p>Geen wachten op een offerte of terugbelverzoek: je ziet meteen op de site welke batterijcapaciteit bij jouw situatie past.</p>
+      </div>
+      <div class="quote benefit">
+        <div class="q-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5c0 4.5 3.4 7.9 8 9.5 4.6-1.6 8-5 8-9.5v-5z"/><path d="M9 12l2 2 4-4.5"/></svg></div>
+        <h3>Eerlijke aannames</h3>
+        <p>We rekenen met openbare bronnen (CBS-tarieven, Milieu Centraal) en de echte wettekst — en benoemen precies waar het een schatting is.</p>
+      </div>
+      <div class="quote benefit">
+        <div class="q-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg></div>
+        <h3>Vrijblijvend — jij beslist</h3>
+        <p>Je advies is gratis en je zit nergens aan vast. Bellen doen we alleen met jouw toestemming, en je kunt je altijd afmelden.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">Veelgestelde vragen</div>
+      <h2>Alles wat je je nu afvraagt.</h2>
+    </div>
+    <div class="faq-list">
+      <details>
+        <summary>Stopt de salderingsregeling echt? <span class="pm"></span></summary>
+        <div class="faq-body">Ja. De Eerste Kamer heeft de <em>Wet be&euml;indiging salderingsregeling</em> aangenomen. Vanaf 1 januari 2027 kun je opgewekte stroom niet meer wegstrepen tegen je verbruik. Je krijgt dan een terugleververgoeding van minimaal 50% van het kale leveringstarief (het tarief zonder belasting) — een stuk lager dan wat je nu via salderen terugkrijgt.</div>
+      </details>
+      <details>
+        <summary>Hoe wordt mijn verlies berekend? <span class="pm"></span></summary>
+        <div class="faq-body">We rekenen met gemiddelden: ongeveer 340 kWh opbrengst per paneel per jaar en zo'n 30% direct eigen verbruik zonder batterij (bron: Milieu Centraal). De overige ~70% lever je terug — en juist daar zit vanaf 2027 je verlies. De uitkomst is een indicatie op basis van jouw eigen teruglevering.</div>
+      </details>
+      <details>
+        <summary>Is het batterij-advies echt gratis en vrijblijvend? <span class="pm"></span></summary>
+        <div class="faq-body">Ja, volledig gratis en zonder verplichtingen. Je ziet direct welke batterijcapaciteit bij je past en beslist daarna zelf of je verder wilt. Geen kleine lettertjes.</div>
+      </details>
+      <details>
+        <summary>Wat kost een thuisbatterij ongeveer? <span class="pm"></span></summary>
+        <div class="faq-body">Dat hangt af van de gewenste capaciteit en je situatie. Vul je piekdag in om te zien welke capaciteit bij je past — en bel ons vrijblijvend als je wilt weten wat die specifieke batterij kost en oplevert.</div>
+      </details>
+      <details>
+        <summary>Wat gebeurt er met mijn gegevens? <span class="pm"></span></summary>
+        <div class="faq-body">Met je telefoonnummer kunnen we je bellen voor vrijblijvend advies over een thuisbatterij — meer niet. We verkopen je gegevens niet door en je kunt je altijd weer afmelden.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2>De saldering stopt. Je verlies begint vanzelf.</h2>
+    <p>Ontdek in 30 seconden wat het jou kost — en welke batterij dat verlies grotendeels voorkomt.</p>
+    <a href="#rekentool" class="btn btn-solar">Welke batterij past bij mij?</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="disc">
+      <strong style="color:var(--on-ink);">Salderingscheck</strong> — gratis &amp; vrijblijvend advies over thuisbatterijen.<br><br>
+      Alle bedragen zijn indicatief en gebaseerd op gemiddelden (~340 kWh per paneel per jaar, ~30% eigen verbruik zonder batterij volgens Milieu Centraal, een all-in stroomtarief van &euro;0,26/kWh en een kaal leveringstarief van &euro;0,10/kWh volgens CBS, januari 2026) en op de <em>Wet be&euml;indiging salderingsregeling</em> (terugleververgoeding minimaal 50% van het kale tarief, eerste 3 jaar). De 10-jaarsprojectie gaat uit van gelijkblijvende tarieven en is puur indicatief. Je werkelijke situatie kan afwijken; dit is geen persoonlijk financieel advies.
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   ANALYTICS — lichtgewicht, privacyvriendelijk trechter-meten.
+   Geen cookies, geen externe dienst, geen persoonsgegevens: we
+   tellen alleen anonieme funnel-stappen op in localStorage.
+   Bekijk de resultaten op analytics.html (met dezelfde toegangscode
+   als de leadkaart). Later kan dit eenvoudig naar de cloud.
+══════════════════════════════════════════════════════════════ */
+const ANALYTICS_KEY = 'bc_analytics_v1';
+function trackEvent(stap){
+  try{
+    const data = JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '{}');
+    data[stap] = (data[stap] || 0) + 1;
+    // markeer bezoekers uniek per dag zodat je "unieke bezoekers" kunt tonen
+    const vandaag = new Date().toISOString().slice(0,10);
+    data._dagen = data._dagen || {};
+    data._dagen[vandaag] = (data._dagen[vandaag] || 0) + (stap === 'bezoek' ? 1 : 0);
+    localStorage.setItem(ANALYTICS_KEY, JSON.stringify(data));
+  }catch(e){ /* stil falen — meten mag nooit de site breken */ }
+  // ook naar de cloud tellen zodra Firebase geladen is (module laadt async)
+  if(window.trackCloud) window.trackCloud(stap);
+  else window.addEventListener('cloud-analytics-ready', ()=>window.trackCloud && window.trackCloud(stap), {once:true});
+}
+// één bezoek per sessie tellen (niet elke reload)
+if(!sessionStorage.getItem('bc_bezocht')){
+  sessionStorage.setItem('bc_bezocht', '1');
+  trackEvent('bezoek');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AFTELKLOK tot 1 januari 2027
+══════════════════════════════════════════════════════════════ */
+(function(){
+  const doel = new Date('2027-01-01T00:00:00');
+  const dagen = Math.max(0, Math.ceil((doel - new Date()) / 86400000));
+  const el = document.getElementById('countdown');
+  if(el) el.textContent = dagen.toLocaleString('nl-NL');
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   REKENLOGICA — indicatie van jaarlijks verlies door de afbouw
+   van de salderingsregeling (wet ingegaan per 1-1-2027).
+
+   Twee belangrijke nuances t.o.v. een naïeve berekening:
+
+   1) Het gaat om je BRUTO teruglevering (opwek minus wat je zelf
+      direct gebruikt), niet om het verschil tussen jaartotalen
+      opwek/verbruik. Ook als je in totaal minder opwekt dan je
+      verbruikt, lever je overdag het grootste deel terug en koop
+      je 's avonds weer stroom terug — dat wordt nu 1-op-1 verrekend
+      (saldering), maar dat verdwijnt vanaf 2027. Gemiddeld gebruikt
+      een huishouden zónder batterij maar ~30% van de opwek direct
+      zelf; de rest (~70%) wordt teruggeleverd. Bron: Milieu Centraal.
+
+   2) De nieuwe vergoeding vanaf 2027 is 50% van het KALE
+      leveringstarief (excl. energiebelasting/ODE/BTW) — niet 50%
+      van het volledige tarief dat je nu via salderen terugkrijgt.
+      Bron: Rijksoverheid.nl / Wet beëindiging salderingsregeling.
+══════════════════════════════════════════════════════════════ */
+const KWH_PER_PANEEL = 340;        // gemiddelde jaaropbrengst per paneel in NL (vuistregel)
+// Zelfverbruikspercentage zonder batterij hangt in werkelijkheid samen met hoe
+// groot het huishouden is (meer verbruik overdag = meer directe benutting van
+// de opwek). ~30% is het gemiddelde over alle huishoudens (bron: Milieu
+// Centraal); we laten 'm richtinggevend meebewegen per gekozen verbruiksniveau.
+const ZELFVERBRUIK_PER_TIER = { 2500: 0.22, 3500: 0.30, 5000: 0.38 };
+const STROOMPRIJS_ALLIN = 0.26;    // euro/kWh, huidig volledig tarief incl. belasting/BTW (bron: CBS, jan 2026)
+const KAAL_LEVERINGSTARIEF = 0.10; // euro/kWh, tarief zonder belasting/BTW (bron: CBS, jan 2026)
+const COMPENSATIE_FACTOR = 0.5;    // wettelijk minimum vanaf 2027 (eerste 3 jaar), percentage van het KALE tarief
+
+let laatsteBerekening = null;
+
+let funnelStap = { berekend:false, piekdag:false, formulier:false };
+function berekenVerlies(){
+  const panelen = parseInt(document.getElementById('c_panelen').value);
+  if(!panelen || panelen < 1){ alert('Vul het aantal zonnepanelen in.'); document.getElementById('c_panelen').focus(); return; }
+  if(!funnelStap.berekend){ funnelStap.berekend = true; trackEvent('berekend'); }
+
+  // Korte "we berekenen je situatie"-status: geeft de indruk (en geeft ook
+  // echt) dat er even iets voor je wordt doorgerekend, i.p.v. een instant
+  // antwoord dat als een simpel trucje aanvoelt.
+  const btn = document.getElementById('calcBtn');
+  const label = document.getElementById('calcBtnLabel');
+  const icon = document.getElementById('calcBtnIcon');
+  const eerderTekst = label.textContent;
+  btn.disabled = true;
+  label.textContent = 'Je situatie wordt berekend…';
+  icon.outerHTML = '<span class="spin" id="calcBtnIcon"></span>';
+
+  setTimeout(()=>{
+    voerBerekeningUit(panelen);
+    btn.disabled = false;
+    label.textContent = eerderTekst;
+    document.getElementById('calcBtnIcon').outerHTML = '<svg id="calcBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  }, 1100);
+}
+
+function voerBerekeningUit(panelen){
+  const verbruik = parseInt(document.querySelector('#verbruikChips .chip.active').dataset.val);
+  const eigenaar = document.querySelector('#eigenaarChips .chip.active').dataset.val;
+
+  const opwek = panelen * KWH_PER_PANEEL;
+  const zelfverbruikFractie = ZELFVERBRUIK_PER_TIER[verbruik] || 0.30;
+  const zelfverbruik = Math.min(opwek * zelfverbruikFractie, verbruik, opwek);
+  const surplus = Math.max(0, opwek - zelfverbruik); // bruto teruglevering aan het net
+  const verliesPerKwh = STROOMPRIJS_ALLIN - (KAAL_LEVERINGSTARIEF * COMPENSATIE_FACTOR);
+  const verliesPerJaar = Math.round(surplus * verliesPerKwh);
+  const verlies10jaar = verliesPerJaar * 10;
+
+  laatsteBerekening = { panelen, verbruik, eigenaar, opwek, zelfverbruik, surplus, verliesPerJaar, verlies10jaar };
+
+  document.getElementById('resultEmpty').classList.add('hidden');
+  const filled = document.getElementById('resultFilled');
+  filled.classList.remove('hidden');
+  filled.classList.remove('reveal'); void filled.offsetWidth; filled.classList.add('reveal');
+
+  animeerBedrag('resAmount', verliesPerJaar, '€');
+  animeerBedrag('resCumul', verlies10jaar, '€');
+  document.getElementById('resOpwek').textContent = opwek.toLocaleString('nl-NL');
+  document.getElementById('resSurplus').textContent = Math.round(surplus).toLocaleString('nl-NL');
+
+  // teaser terugzetten naar vervaagd als er opnieuw wordt gerekend
+  const teaser = document.getElementById('teaserCard');
+  if(teaser) teaser.classList.remove('unlocked');
+
+  // stap 2 (piekdag-vraag) meteen tonen, direct onder het verlies
+  toonPiekdagVraag();
+
+  // scroll de meter in beeld op mobiel
+  if(window.innerWidth < 780){
+    document.getElementById('resultPane').scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function animeerBedrag(id, doel, prefix){
+  const el = document.getElementById(id);
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    el.textContent = prefix + doel.toLocaleString('nl-NL'); return;
+  }
+  const duur = 800, start = performance.now();
+  function frame(t){
+    const p = Math.min(1, (t-start)/duur);
+    const eased = 1 - Math.pow(1-p, 3);
+    el.textContent = prefix + Math.round(doel*eased).toLocaleString('nl-NL');
+    if(p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+document.getElementById('verbruikChips').addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('#verbruikChips .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen); // direct herberekenen, geen laadanimatie nodig
+});
+document.getElementById('eigenaarChips').addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('#eigenaarChips .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen);
+});
+
+// Het advies rondt de piekdag-teruglevering ALTIJD naar boven af naar de
+// eerstvolgende gangbare batterijmaat (stappen van 5 kWh), zodat de
+// batterij ook je zonnigste dag volledig kan opvangen. Bij een piekdag
+// van 30 kWh krijg je dus 30 kWh, niet minder.
+function aanbevolenCapaciteit(piekKwh){
+  return Math.max(5, Math.ceil(piekKwh / 5) * 5);
+}
+
+let piekdagSchattingWaarde = null;
+
+function toonPiekdagVraag(){
+  if(!funnelStap.piekdag){ funnelStap.piekdag = true; trackEvent('piekdag_geopend'); }
+  const blok = document.getElementById('piekdagBlok');
+  blok.classList.remove('hidden');
+  // richtinggevende schatting: op de zonnigste dag lever je gemiddeld
+  // een veelvoud van je gemiddelde dagelijkse teruglevering terug
+  // (vuistregel: piekdag ≈ 3x het jaargemiddelde, door het seizoenseffect)
+  if(laatsteBerekening){
+    piekdagSchattingWaarde = Math.round((laatsteBerekening.surplus / 365) * 3 * 10) / 10;
+    document.getElementById('piekdagSchatting').textContent = piekdagSchattingWaarde;
+  }
+}
+
+function gebruikSchatting(){
+  if(piekdagSchattingWaarde == null) return;
+  const input = document.getElementById('p_piekdag');
+  input.value = piekdagSchattingWaarde;
+  input.focus({preventScroll:true});
+}
+
+function toonLeadForm(){
+  const piek = parseFloat(document.getElementById('p_piekdag').value);
+  if(!piek || piek <= 0){ alert('Vul in wat je ongeveer op je zonnigste dag teruglevert — of gebruik onze schatting.'); return; }
+  if(laatsteBerekening) laatsteBerekening.piekdagKwh = piek;
+  if(!funnelStap.formulier){ funnelStap.formulier = true; trackEvent('formulier_bereikt'); }
+
+  // laat de vergrendelde teaser alvast zien: het advies is nu écht berekend,
+  // alleen nog niet zichtbaar tot na stap 3
+  const teaser = document.getElementById('teaserCard');
+  teaser.classList.remove('hidden');
+  document.getElementById('teaserCapaciteit').textContent = '?? kWh';
+
+  // het gegevensformulier (stap 3) verschijnt pas nu, nadat de piekdag is ingevuld
+  document.getElementById('advies').classList.remove('hidden');
+  document.getElementById('advies').scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(()=>{ const n=document.getElementById('l_telefoon'); if(n) n.focus({preventScroll:true}); }, 600);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ADRES-ZOEKEN VIA PDOK (gratis, officiële NL-overheidsdata,
+   geen API-key nodig) — voor autocomplete + geocoderen naar lat/lng
+══════════════════════════════════════════════════════════════ */
+let geocodedAdres = null;
+let zoekTimer = null;
+
+function zoekAdres(){
+  clearTimeout(zoekTimer);
+  document.getElementById('adresBevestiging').style.display = 'none';
+  geocodedAdres = null;
+  updateSubmitState();
+  const postcode = document.getElementById('l_postcode').value.trim();
+  const huisnummer = document.getElementById('l_huisnummer').value.trim();
+  if(postcode.replace(/\s/g,'').length < 6 || !huisnummer){ document.getElementById('adresSuggesties').innerHTML=''; return; }
+
+  zoekTimer = setTimeout(async ()=>{
+    try{
+      const q = encodeURIComponent(`${postcode} ${huisnummer}`);
+      const res = await fetch(`https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${q}&fq=type:adres&rows=5`);
+      const data = await res.json();
+      renderSuggesties((data.response && data.response.docs) || []);
+    }catch(e){ console.error('PDOK-zoekopdracht mislukt:', e); }
+  }, 350);
+}
+
+function renderSuggesties(docs){
+  const el = document.getElementById('adresSuggesties');
+  if(!docs.length){ el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="suggest-list">${docs.map((d,i)=>`
+    <div class="suggest-item" onclick="kiesAdres(${i})">${d.weergavenaam}</div>`).join('')}</div>`;
+  window._pdokDocs = docs;
+}
+
+async function kiesAdres(i){
+  const doc = window._pdokDocs[i];
+  document.getElementById('adresSuggesties').innerHTML = '';
+  try{
+    const res = await fetch(`https://api.pdok.nl/bzk/locatieserver/search/v3_1/lookup?id=${encodeURIComponent(doc.id)}`);
+    const data = await res.json();
+    const detail = data.response.docs[0];
+    const [lng, lat] = detail.centroide_ll.replace('POINT(','').replace(')','').split(' ').map(Number);
+    geocodedAdres = {
+      weergavenaam: detail.weergavenaam,
+      postcode: detail.postcode, huisnummer: detail.huisnummer,
+      straat: detail.straatnaam, plaats: detail.woonplaatsnaam,
+      gemeente: detail.gemeentenaam, provincie: detail.provincienaam,
+      lat, lng
+    };
+    document.getElementById('adresTekst').textContent = detail.weergavenaam;
+    document.getElementById('adresBevestiging').style.display = 'flex';
+  }catch(e){ console.error('PDOK lookup mislukt:', e); }
+  updateSubmitState();
+}
+
+function updateSubmitState(){
+  const consent = document.getElementById('l_consent').checked;
+  document.getElementById('submitBtn').disabled = !consent || !geocodedAdres;
+}
+document.getElementById('l_consent').addEventListener('change', updateSubmitState);
+
+/* ══════════════════════════════════════════════════════════════
+   LEAD VERSTUREN — wordt gekoppeld aan Firebase (window.leadSync);
+   zolang dat niet actief is, wordt de lead lokaal gelogd.
+══════════════════════════════════════════════════════════════ */
+async function verstuurLead(){
+  // vangnet: als iemand direct naar het formulier scrolt zonder eerst
+  // stap 1 en 2 te doen, sturen we ze eerst terug naar de berekening
+  if(!laatsteBerekening || laatsteBerekening.piekdagKwh == null){
+    alert('Bereken eerst je verlies en vul je hoogste teruglevering op één dag in (stap 1 en 2).');
+    document.getElementById('rekentool') ? document.getElementById('rekentool').scrollIntoView({behavior:'smooth'}) : window.scrollTo({top:0, behavior:'smooth'});
+    return;
+  }
+  const voornaam = document.getElementById('l_voornaam').value.trim();
+  const achternaam = document.getElementById('l_achternaam').value.trim();
+  const telefoon = document.getElementById('l_telefoon').value.trim();
+  if(!voornaam || !achternaam){ alert('Vul je voor- en achternaam in.'); return; }
+  if(!telefoon){ alert('Vul je telefoonnummer in.'); return; }
+  if(!geocodedAdres){ alert('Kies je adres uit de suggesties.'); return; }
+
+  const naam = `${voornaam} ${achternaam}`;
+  const lead = { naam, voornaam, achternaam, telefoon, adres: geocodedAdres, berekening: laatsteBerekening, tijd: new Date().toISOString(), gebeld: false };
+
+  if(window.leadSync){ await window.leadSync.saveLead(lead); }
+  else { console.log('LEAD (nog geen cloud-koppeling actief):', lead); }
+  trackEvent('lead');
+
+  document.getElementById('leadForm').classList.add('hidden');
+  document.getElementById('piekdagBlok').classList.add('hidden');
+
+  // Toon het echte batterijadvies meteen op de site, zoals gevraagd —
+  // gebaseerd op de zelf opgegeven piekdag-teruglevering, afgerond naar
+  // de eerstvolgende standaard batterijmaat.
+  const capaciteit = aanbevolenCapaciteit(laatsteBerekening.piekdagKwh);
+
+  // 1) de teaser in de rekenkaart ontgrendelen
+  const teaser = document.getElementById('teaserCard');
+  teaser.classList.remove('hidden');
+  teaser.classList.add('unlocked');
+  document.getElementById('teaserCapaciteit').textContent = `${capaciteit} kWh`;
+  document.getElementById('teaserNote').textContent = `Op basis van je piekdag van ${laatsteBerekening.piekdagKwh} kWh teruglevering.`;
+
+  // 2) de grote onthulling in de bedankt-kaart, met batterij-animatie
+  document.getElementById('batKwh').textContent = capaciteit;
+  document.getElementById('batNote').textContent = `Op basis van je piekdag van ${laatsteBerekening.piekdagKwh} kWh teruglevering — groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
+  const thanks = document.getElementById('thanksCard');
+  thanks.classList.remove('hidden');
+  thanks.scrollIntoView({behavior:'smooth', block:'center'});
+  laadBatterijAnimatie();
+}
+
+// Laat de batterij vak-voor-vak "opladen" en toon daarna de bliksem.
+function laadBatterijAnimatie(){
+  const segs = document.querySelectorAll('#batBody .bat-seg');
+  const bolt = document.getElementById('batBolt');
+  const body = document.getElementById('batBody');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  segs.forEach(s=>s.classList.remove('on'));
+  if(bolt) bolt.classList.remove('on');
+  if(body) body.classList.remove('full');
+  if(reduce){
+    segs.forEach(s=>s.classList.add('on'));
+    if(bolt) bolt.classList.add('on');
+    if(body) body.classList.add('full');
+    return;
+  }
+  segs.forEach((s,i)=> setTimeout(()=>s.classList.add('on'), 250 + i*160));
+  setTimeout(()=>{ if(bolt) bolt.classList.add('on'); if(body) body.classList.add('full'); }, 250 + segs.length*160 + 150);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ZACHTE SCROLL-REVEAL van kaarten en stappen
+══════════════════════════════════════════════════════════════ */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const doelen = document.querySelectorAll('.step, .quote, .proof-stats .st, .howto .row, .faq-list details');
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.15});
+  doelen.forEach(el=>{ el.classList.add('io-fade'); io.observe(el); });
+})();
+</script>
+
+<script type="module">
+/* ══════════════════════════════════════════════════════════════
+   FIREBASE — leads opslaan + funnel-analytics bundelen in de cloud.
+══════════════════════════════════════════════════════════════ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBRKjRQLImc4Aw8TIkhzuesnIowETybOOg",
+  authDomain: "salderingscheck.firebaseapp.com",
+  projectId: "salderingscheck",
+  storageBucket: "salderingscheck.firebasestorage.app",
+  messagingSenderId: "730797630902",
+  appId: "1:730797630902:web:8ac39836ee03fa1f974d17"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Leads wegschrijven naar de 'leads'-collectie
+window.leadSync = {
+  async saveLead(lead){
+    try{ await addDoc(collection(db, 'leads'), lead); return true; }
+    catch(e){ console.error('Lead opslaan mislukt:', e); return false; }
+  }
+};
+
+// Analytics: elke funnel-stap ook in de cloud optellen (één doc met tellers)
+window.trackCloud = async function(stap){
+  try{ await setDoc(doc(db, 'analytics', 'funnel'), { [stap]: increment(1) }, { merge:true }); }
+  catch(e){ /* stil falen — meten mag de site nooit breken */ }
+};
+// laat de klassieke code weten dat trackCloud nu beschikbaar is,
+// zodat events die vóór het laden vuurden alsnog worden doorgestuurd
+window.dispatchEvent(new Event('cloud-analytics-ready'));
+</script>
+</body>
+</html>
