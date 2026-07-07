@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Over ons — Salderingscheck</title>
+<meta name="robots" content="index, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0d1526; --paper:#eef1f6; --surface:#ffffff; --border:#dde3ec;
+    --text1:#0f1a30; --text2:#47536b; --text3:#8b97ac;
+    --solar:#ffb300; --solar-deep:#e08c00;
+    --fd:"Archivo", system-ui, sans-serif; --fb:"Figtree", system-ui, sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:var(--fb); background:var(--paper); color:var(--text1); line-height:1.65; -webkit-font-smoothing:antialiased; }
+  a{ color:var(--solar-deep); }
+  .topbar{ background:var(--ink); padding:16px 0; }
+  .topbar .wrap{ display:flex; align-items:center; justify-content:space-between; }
+  .topbar a.back{ color:#eef2f9; font-size:13.5px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+  .wrap{ width:100%; max-width:760px; margin:0 auto; padding:0 22px; }
+  main{ padding:46px 0 70px; }
+  h1{ font-family:var(--fd); font-weight:800; font-size:clamp(26px,4vw,34px); letter-spacing:-.5px; }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px 26px 8px; margin-top:28px; }
+  h2{ font-family:var(--fd); font-weight:700; font-size:18px; margin-bottom:10px; letter-spacing:-.2px; }
+  section{ margin-bottom:26px; }
+  p{ font-size:14.5px; color:var(--text2); }
+  p + p{ margin-top:10px; }
+  .bedrijf{ background:var(--paper); border:1px solid var(--border); border-radius:12px; padding:16px 18px; font-size:14px; margin-top:10px; }
+  .bedrijf b{ color:var(--text1); }
+  .bedrijf div{ margin-top:4px; }
+  .bedrijf div:first-child{ margin-top:0; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="back" href="index.html">&larr; Terug naar Salderingscheck</a>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <h1>Over ons</h1>
+
+    <div class="card">
+      <section>
+        <h2>Wie zit hierachter?</h2>
+        <p>Salderingscheck is een dienst van Tobias Slootweg Sales. Als zelfstandig ondernemer help ik huiseigenaren met zonnepanelen begrijpen wat de aankomende salderingsstop (1 januari 2027) voor hun portemonnee betekent, en of een thuisbatterij daarbij uitkomst biedt.</p>
+        <p>Vul je de rekentool in en laat je gegevens achter, dan bel ik je persoonlijk voor een vrijblijvend advies — geen callcenter, geen tussenpersonen.</p>
+      </section>
+
+      <section>
+        <h2>Bedrijfsgegevens</h2>
+        <div class="bedrijf">
+          <div><b>Tobias Slootweg Sales</b></div>
+          <div>KvK-nummer: 95183876</div>
+          <div>E-mail: <a href="mailto:Tobias.Zakelijk@outlook.com">Tobias.Zakelijk@outlook.com</a></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Vragen over je gegevens?</h2>
+        <p>Lees de volledige <a href="privacy.html">privacyverklaring</a> voor meer informatie over welke gegevens we verzamelen, waarom, en hoe je ze kunt laten aanpassen of verwijderen.</p>
+      </section>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
