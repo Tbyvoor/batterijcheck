@@ -303,16 +303,23 @@
   #boekBevestig{ width:100%; }
   #boekBevestig:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
 
-  /* Advies-popup (springt in beeld bij het batterij-advies) */
-  .advies-popup{ text-align:center; max-width:400px; }
-  .advies-popup .ap-ico{ width:56px; height:56px; margin:0 auto 14px; border-radius:50%; background:rgba(255,179,0,.14); display:flex; align-items:center; justify-content:center; }
-  .advies-popup .ap-ico svg{ width:28px; height:28px; color:var(--solar-deep); }
-  .advies-popup h3{ font-family:var(--fd); font-weight:800; font-size:21px; color:var(--text1); }
-  .advies-popup p{ font-size:14px; color:var(--text2); line-height:1.6; margin:10px auto 0; max-width:34ch; }
-  .advies-popup .ap-vraag{ color:var(--text1); font-weight:600; margin-top:14px; }
-  .advies-popup .btn-solar{ width:100%; margin-top:20px; }
-  .advies-popup .ap-later{ display:block; width:100%; margin-top:10px; background:none; border:none; font-family:var(--fd); font-weight:600; font-size:13.5px; color:var(--text3); cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:2px; }
-  .advies-popup .ap-later:hover{ color:var(--text2); }
+  /* Advies-melding: slidet van bovenaf in beeld (blokkeert de pagina niet) */
+  .advies-slide{ position:fixed; top:0; left:50%; z-index:1500; width:calc(100% - 20px); max-width:460px;
+    transform:translateX(-50%) translateY(-140%); transition:transform .5s cubic-bezier(.2,.9,.3,1.2);
+    background:var(--surface); border:1px solid var(--border); border-top:none; border-radius:0 0 18px 18px;
+    box-shadow:0 22px 50px -14px rgba(13,21,38,.45); padding:18px 20px 16px; }
+  .advies-slide.open{ transform:translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce){ .advies-slide{ transition:none; } }
+  .advies-slide .boek-close{ top:10px; right:10px; width:30px; height:30px; font-size:19px; }
+  .ap-head{ display:flex; gap:13px; align-items:flex-start; padding-right:26px; }
+  .ap-ico{ flex-shrink:0; width:42px; height:42px; border-radius:50%; background:rgba(255,179,0,.14); display:flex; align-items:center; justify-content:center; }
+  .ap-ico svg{ width:22px; height:22px; color:var(--solar-deep); }
+  .advies-slide h3{ font-family:var(--fd); font-weight:800; font-size:17px; color:var(--text1); }
+  .advies-slide p{ font-size:13px; color:var(--text2); line-height:1.55; margin-top:4px; }
+  .ap-acties{ display:flex; align-items:center; gap:10px; margin-top:14px; }
+  .ap-acties .btn-solar{ flex:1; padding:12px 16px; font-size:14.5px; }
+  .ap-later{ flex-shrink:0; background:none; border:none; font-family:var(--fd); font-weight:600; font-size:13px; color:var(--text3); cursor:pointer; padding:8px 6px; white-space:nowrap; }
+  .ap-later:hover{ color:var(--text2); }
 
   /* Sociale bewijskracht */
   .proof{ background:var(--surface); }
@@ -695,16 +702,19 @@
   </div>
 </footer>
 
-<!-- ── Advies-popup: springt in beeld zodra je batterij-advies verschijnt ── -->
-<div class="boek-overlay hidden" id="adviesPopup" onclick="if(event.target===this) sluitAdviesPopup()">
-  <div class="boek-modal advies-popup" role="dialog" aria-modal="true" aria-labelledby="adviesPopupTitel">
-    <button class="boek-close" onclick="sluitAdviesPopup()" aria-label="Sluiten">&times;</button>
+<!-- ── Advies-melding: slidet van bovenaf in beeld, blokkeert niks ── -->
+<div class="advies-slide" id="adviesPopup" role="dialog" aria-labelledby="adviesPopupTitel">
+  <button class="boek-close" onclick="sluitAdviesPopup()" aria-label="Sluiten">&times;</button>
+  <div class="ap-head">
     <div class="ap-ico">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
-    <h3 id="adviesPopupTitel">Dit is een schatting</h3>
-    <p>Je advies van <b id="apCapaciteit">—</b> is berekend op je eigen invoer. Je exacte situatie — dak, verbruik en stroomcontract — bepaalt welke batterij écht het meeste oplevert.</p>
-    <p class="ap-vraag">Wil je het precíes weten? Een specialist rekent het <b>gratis en vrijblijvend</b> voor je door.</p>
+    <div>
+      <h3 id="adviesPopupTitel">Dit is een schatting</h3>
+      <p>Je advies van <b id="apCapaciteit">—</b> is een schatting op je eigen invoer. Wil je exact weten wat het jóú oplevert? Een specialist rekent het <b>gratis</b> voor je door.</p>
+    </div>
+  </div>
+  <div class="ap-acties">
     <button class="btn btn-solar" onclick="naarBoeken()">Krijg beter advies
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
     </button>
@@ -1140,27 +1150,25 @@ function sluitBoek(){
   document.body.style.overflow = '';
 }
 
-// Advies-popup: springt in beeld zodra het batterij-advies verschijnt
+// Advies-melding: slidet van bovenaf in beeld, zonder de pagina te blokkeren
 function toonAdviesPopup(){
   const cap = document.getElementById('batKwh').textContent;
   document.getElementById('apCapaciteit').textContent = cap ? `${cap} kWh thuisbatterij` : 'een thuisbatterij';
-  document.getElementById('adviesPopup').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  document.getElementById('adviesPopup').classList.add('open');
 }
 function sluitAdviesPopup(){
-  document.getElementById('adviesPopup').classList.add('hidden');
-  document.body.style.overflow = '';
+  document.getElementById('adviesPopup').classList.remove('open');
 }
-// vanuit de popup direct door naar het kiezen van dag + tijd
+// vanuit de melding direct door naar het kiezen van dag + tijd
 function naarBoeken(){
-  document.getElementById('adviesPopup').classList.add('hidden');
-  openSpecialist(); // zet zelf de scroll-lock weer aan
+  document.getElementById('adviesPopup').classList.remove('open');
+  openSpecialist();
 }
 
 document.addEventListener('keydown', e=>{
   if(e.key !== 'Escape') return;
   if(!document.getElementById('boekOverlay').classList.contains('hidden')) sluitBoek();
-  else if(!document.getElementById('adviesPopup').classList.contains('hidden')) sluitAdviesPopup();
+  else if(document.getElementById('adviesPopup').classList.contains('open')) sluitAdviesPopup();
 });
 
 // De eerstvolgende 8 dagen (vanaf morgen), zondag overgeslagen
