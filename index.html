@@ -267,6 +267,11 @@
   .specialist-done .sd-check svg{ width:28px; height:28px; color:#fff; }
   .specialist-done h4{ font-family:var(--fd); font-weight:800; font-size:18px; color:var(--text1); }
   .specialist-done p{ font-size:13.5px; color:var(--text2); margin:8px auto 0; max-width:34ch; line-height:1.55; }
+  .sd-acties{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:16px; }
+  .sd-link{ background:none; border:none; font-family:var(--fd); font-weight:700; font-size:13px; color:var(--text2); cursor:pointer; padding:4px 2px; text-decoration:underline; text-underline-offset:2px; }
+  .sd-link:hover{ color:var(--text1); }
+  .sd-link.sd-annuleer{ color:var(--lose); }
+  .sd-sep{ color:var(--text3); }
 
   /* ── Boek-overlay (aparte plek voor dag/tijd) ── */
   .boek-overlay{ position:fixed; inset:0; z-index:2000; background:rgba(9,13,22,.72); backdrop-filter:blur(3px); display:flex; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
@@ -585,6 +590,11 @@
             <div class="sd-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
             <h4>Je belafspraak staat genoteerd</h4>
             <p id="specialistDoneNote">Een specialist belt je op je voorkeursmoment voor een exacte doorrekening. Tot snel!</p>
+            <div class="sd-acties">
+              <button type="button" class="sd-link" onclick="openSpecialist()">Wijzigen</button>
+              <span class="sd-sep">&middot;</span>
+              <button type="button" class="sd-link sd-annuleer" onclick="annuleerAfspraak()">Annuleren</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1157,6 +1167,21 @@ async function bevestigBoek(){
   done.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
+// Afspraak annuleren: lead wordt meteen weer een gewone (niet-warme) lead
+async function annuleerAfspraak(){
+  if(!confirm('Weet je zeker dat je de belafspraak wilt annuleren?')) return;
+  if(window.leadSync && laatsteLeadId){ await window.leadSync.cancelWarm(laatsteLeadId); }
+  else { console.log('AFSPRAAK GEANNULEERD (nog geen cloud-koppeling of lead-id)'); }
+  trackEvent('afspraak_geannuleerd');
+
+  gekozenDag = null; gekozenTijd = null;
+  document.getElementById('specialistDone').classList.add('hidden');
+  const blok = document.getElementById('specialistBlok');
+  blok.classList.remove('hidden');
+  document.getElementById('specialistBtn').classList.remove('hidden');
+  blok.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
 // Laat de batterij vak-voor-vak "opladen" en toon daarna de bliksem.
 function laadBatterijAnimatie(){
   const segs = document.querySelectorAll('#batBody .bat-seg');
@@ -1219,6 +1244,12 @@ window.leadSync = {
     if(!id) return false;
     try{ await updateDoc(doc(db, 'leads', id), { warm:true, warmVoorkeur: voorkeur || '', warmTijd: new Date().toISOString() }); return true; }
     catch(e){ console.error('Warm markeren mislukt:', e); return false; }
+  },
+  // belafspraak geannuleerd: lead terug naar 'gewoon' (niet meer warm)
+  async cancelWarm(id){
+    if(!id) return false;
+    try{ await updateDoc(doc(db, 'leads', id), { warm:false, warmVoorkeur:'', warmTijd:'' }); return true; }
+    catch(e){ console.error('Afspraak annuleren mislukt:', e); return false; }
   }
 };
 
