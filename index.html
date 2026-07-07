@@ -303,6 +303,17 @@
   #boekBevestig{ width:100%; }
   #boekBevestig:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
 
+  /* Advies-popup (springt in beeld bij het batterij-advies) */
+  .advies-popup{ text-align:center; max-width:400px; }
+  .advies-popup .ap-ico{ width:56px; height:56px; margin:0 auto 14px; border-radius:50%; background:rgba(255,179,0,.14); display:flex; align-items:center; justify-content:center; }
+  .advies-popup .ap-ico svg{ width:28px; height:28px; color:var(--solar-deep); }
+  .advies-popup h3{ font-family:var(--fd); font-weight:800; font-size:21px; color:var(--text1); }
+  .advies-popup p{ font-size:14px; color:var(--text2); line-height:1.6; margin:10px auto 0; max-width:34ch; }
+  .advies-popup .ap-vraag{ color:var(--text1); font-weight:600; margin-top:14px; }
+  .advies-popup .btn-solar{ width:100%; margin-top:20px; }
+  .advies-popup .ap-later{ display:block; width:100%; margin-top:10px; background:none; border:none; font-family:var(--fd); font-weight:600; font-size:13.5px; color:var(--text3); cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:2px; }
+  .advies-popup .ap-later:hover{ color:var(--text2); }
+
   /* Sociale bewijskracht */
   .proof{ background:var(--surface); }
   .proof-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; text-align:center; }
@@ -683,6 +694,23 @@
     </div>
   </div>
 </footer>
+
+<!-- ── Advies-popup: springt in beeld zodra je batterij-advies verschijnt ── -->
+<div class="boek-overlay hidden" id="adviesPopup" onclick="if(event.target===this) sluitAdviesPopup()">
+  <div class="boek-modal advies-popup" role="dialog" aria-modal="true" aria-labelledby="adviesPopupTitel">
+    <button class="boek-close" onclick="sluitAdviesPopup()" aria-label="Sluiten">&times;</button>
+    <div class="ap-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <h3 id="adviesPopupTitel">Dit is een schatting</h3>
+    <p>Je advies van <b id="apCapaciteit">—</b> is berekend op je eigen invoer. Je exacte situatie — dak, verbruik en stroomcontract — bepaalt welke batterij écht het meeste oplevert.</p>
+    <p class="ap-vraag">Wil je het precíes weten? Een specialist rekent het <b>gratis en vrijblijvend</b> voor je door.</p>
+    <button class="btn btn-solar" onclick="naarBoeken()">Krijg beter advies
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+    <button class="ap-later" onclick="sluitAdviesPopup()">Later misschien</button>
+  </div>
+</div>
 
 <!-- ── Boek-overlay: aparte plek om een dag + tijd te kiezen ── -->
 <div class="boek-overlay hidden" id="boekOverlay" onclick="if(event.target===this) sluitBoek()">
@@ -1077,10 +1105,13 @@ async function verstuurLead(){
 
   const thanks = document.getElementById('thanksCard');
   thanks.classList.remove('hidden');
-  // naar de bovenkant van het advies: je ziet eerst je batterij, de
-  // 'krijg beter advies'-optie staat pas verderop onder de waarschuwing
+  // naar de bovenkant van het advies: je ziet eerst je batterij
   thanks.scrollIntoView({behavior:'smooth', block:'start'});
   laadBatterijAnimatie();
+
+  // kort na de onthulling springt de waarschuwing + afspraak in beeld
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setTimeout(toonAdviesPopup, reduce ? 500 : 1500);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1108,8 +1139,28 @@ function sluitBoek(){
   document.getElementById('boekOverlay').classList.add('hidden');
   document.body.style.overflow = '';
 }
+
+// Advies-popup: springt in beeld zodra het batterij-advies verschijnt
+function toonAdviesPopup(){
+  const cap = document.getElementById('batKwh').textContent;
+  document.getElementById('apCapaciteit').textContent = cap ? `${cap} kWh thuisbatterij` : 'een thuisbatterij';
+  document.getElementById('adviesPopup').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function sluitAdviesPopup(){
+  document.getElementById('adviesPopup').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+// vanuit de popup direct door naar het kiezen van dag + tijd
+function naarBoeken(){
+  document.getElementById('adviesPopup').classList.add('hidden');
+  openSpecialist(); // zet zelf de scroll-lock weer aan
+}
+
 document.addEventListener('keydown', e=>{
-  if(e.key === 'Escape' && !document.getElementById('boekOverlay').classList.contains('hidden')) sluitBoek();
+  if(e.key !== 'Escape') return;
+  if(!document.getElementById('boekOverlay').classList.contains('hidden')) sluitBoek();
+  else if(!document.getElementById('adviesPopup').classList.contains('hidden')) sluitAdviesPopup();
 });
 
 // De eerstvolgende 8 dagen (vanaf morgen), zondag overgeslagen
