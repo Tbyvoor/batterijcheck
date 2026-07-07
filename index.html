@@ -46,6 +46,9 @@
 
   /* ── Topbalk ── */
   .topbar{ position:sticky; top:0; z-index:50; background:rgba(13,21,38,.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--border-ink); }
+  .terug-bar{ position:sticky; top:0; z-index:60; display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; background:var(--solar); color:#231600; padding:10px 16px; font-family:var(--fd); font-weight:700; font-size:13.5px; text-align:center; }
+  .terug-bar.hidden{ display:none; }
+  .terug-bar button{ background:#231600; color:var(--solar); border:none; border-radius:8px; padding:7px 14px; font-family:var(--fd); font-weight:700; font-size:13px; cursor:pointer; }
   .topbar .wrap{ display:flex; align-items:center; justify-content:space-between; height:60px; }
   .logo{ display:flex; align-items:center; gap:9px; font-family:var(--fd); font-weight:800; font-size:18px; letter-spacing:-.4px; color:var(--on-ink); }
   .logo .spark{ width:26px; height:26px; }
@@ -257,11 +260,10 @@
   .schatting-melding svg{ width:18px; height:18px; color:var(--solar-deep); flex-shrink:0; margin-top:1px; }
   .schatting-melding b{ color:var(--text1); }
 
-  /* specialist-boeking (warme lead) */
-  .specialist{ margin:20px auto 0; max-width:44ch; background:var(--ink); color:var(--on-ink); border-radius:16px; padding:22px 22px 24px; text-align:center; }
-  .specialist h4{ font-family:var(--fd); font-weight:800; font-size:18px; color:#fff; }
-  .specialist p{ font-size:13.5px; color:var(--on-ink-dim); margin:8px auto 16px; max-width:36ch; line-height:1.55; }
-  .specialist .btn-solar{ width:100%; }
+  /* specialist-boeking (warme lead) — compacte CTA onder de waarschuwing */
+  .upgrade-cta{ margin:18px auto 0; max-width:44ch; text-align:center; }
+  .upgrade-cta p{ font-size:13.5px; color:var(--text2); line-height:1.55; margin-bottom:13px; max-width:38ch; margin-left:auto; margin-right:auto; }
+  .upgrade-cta .btn-solar{ width:100%; }
   .specialist-done{ margin:20px auto 0; max-width:44ch; background:var(--keep-bg); border-radius:16px; padding:24px 22px; text-align:center; }
   .specialist-done .sd-check{ width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:var(--keep); display:flex; align-items:center; justify-content:center; }
   .specialist-done .sd-check svg{ width:28px; height:28px; color:#fff; }
@@ -345,6 +347,12 @@
 </style>
 </head>
 <body>
+
+<!-- Verschijnt alleen bij terugkerende bezoekers met een opgeslagen advies -->
+<div class="terug-bar hidden" id="terugBar">
+  <span id="terugTekst">Welkom terug — je batterij-advies staat klaar.</span>
+  <button type="button" onclick="scrollNaarAdvies()">Bekijk &amp; beheer</button>
+</div>
 
 <div class="topbar">
   <div class="wrap">
@@ -578,11 +586,10 @@
             <span><b>Let op:</b> dit is een schatting. Je exacte situatie bepaalt welke batterij écht het beste past.</span>
           </p>
 
-          <!-- Warme-lead upgrade: gratis belafspraak met een specialist -->
-          <div class="specialist" id="specialistBlok">
-            <h4>Wil je het precíes weten?</h4>
-            <p>Plan een gratis, vrijblijvend belletje met een specialist. Samen rekenen we jouw exacte opbrengst door en kijken we welke batterij het meeste oplevert — je zit nergens aan vast.</p>
-            <button class="btn btn-solar" id="specialistBtn" onclick="openSpecialist()" style="margin-top:4px;">Plan mijn gratis belafspraak</button>
+          <!-- Warme-lead upgrade: verschijnt pas onder de waarschuwing -->
+          <div class="upgrade-cta" id="adviesUpgrade">
+            <p>Wil je exact weten wat een thuisbatterij jóú oplevert? Een specialist rekent het gratis en vrijblijvend voor je door.</p>
+            <button class="btn btn-solar" id="specialistBtn" onclick="openSpecialist()">Krijg beter advies</button>
           </div>
 
           <!-- Bevestiging na boeken -->
@@ -779,6 +786,15 @@ const COMPENSATIE_FACTOR = 0.5;    // wettelijk minimum vanaf 2027 (eerste 3 jaa
 
 let laatsteBerekening = null;
 let laatsteLeadId = null;
+
+/* ── Onthouden tussen bezoeken (localStorage) ──────────────────
+   Zo kan een terugkerende bezoeker zijn advies + afspraak terugvinden
+   en beheren, en voorkomen we dubbele leads. */
+const OPSLAG_KEY = 'batterijcheck_lead_v1';
+let leadState = { leadId:null, berekening:null, warm:false, warmVoorkeur:'', form:null };
+function bewaarStatus(){
+  try{ localStorage.setItem(OPSLAG_KEY, JSON.stringify(leadState)); }catch(e){/* privémodus e.d. */}
+}
 
 let funnelStap = { berekend:false, piekdag:false, formulier:false };
 function berekenVerlies(){
@@ -1027,8 +1043,14 @@ async function verstuurLead(){
   const naam = `${voornaam} ${achternaam}`;
   const lead = { naam, voornaam, achternaam, telefoon, adres: geocodedAdres, berekening: laatsteBerekening, tijd: new Date().toISOString(), gebeld: false };
 
-  if(window.leadSync){ laatsteLeadId = await window.leadSync.saveLead(lead); }
-  else { console.log('LEAD (nog geen cloud-koppeling actief):', lead); }
+  // dubbele lead voorkomen: bestaat er al één (deze sessie of onthouden), hergebruik die
+  if(window.leadSync){
+    if(!laatsteLeadId) laatsteLeadId = await window.leadSync.saveLead(lead);
+  } else { console.log('LEAD (nog geen cloud-koppeling actief):', lead); }
+
+  // onthouden voor een volgend bezoek
+  leadState = { leadId: laatsteLeadId, berekening: laatsteBerekening, warm: leadState.warm || false, warmVoorkeur: leadState.warmVoorkeur || '', form: { voornaam, achternaam, telefoon, adres: geocodedAdres } };
+  bewaarStatus();
   trackEvent('lead');
 
   document.getElementById('leadForm').classList.add('hidden');
@@ -1050,13 +1072,14 @@ async function verstuurLead(){
   document.getElementById('batKwh').textContent = capaciteit;
   document.getElementById('batNote').textContent = `Op basis van je piekdag van ${laatsteBerekening.piekdagKwh} kWh teruglevering — groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
   // specialist-boeking terugzetten naar begintoestand
-  document.getElementById('specialistBlok').classList.remove('hidden');
-  document.getElementById('specialistBtn').classList.remove('hidden');
+  document.getElementById('adviesUpgrade').classList.remove('hidden');
   document.getElementById('specialistDone').classList.add('hidden');
 
   const thanks = document.getElementById('thanksCard');
   thanks.classList.remove('hidden');
-  thanks.scrollIntoView({behavior:'smooth', block:'center'});
+  // naar de bovenkant van het advies: je ziet eerst je batterij, de
+  // 'krijg beter advies'-optie staat pas verderop onder de waarschuwing
+  thanks.scrollIntoView({behavior:'smooth', block:'start'});
   laadBatterijAnimatie();
 }
 
@@ -1157,10 +1180,13 @@ async function bevestigBoek(){
   else { console.log('WARME LEAD (nog geen cloud-koppeling of lead-id):', voorkeur); }
   trackEvent('warme_lead');
 
+  // afspraak onthouden
+  leadState.warm = true; leadState.warmVoorkeur = voorkeur; bewaarStatus();
+
   sluitBoek();
 
   // in de advieskaart de bevestiging tonen
-  document.getElementById('specialistBlok').classList.add('hidden');
+  document.getElementById('adviesUpgrade').classList.add('hidden');
   const done = document.getElementById('specialistDone');
   document.getElementById('specialistDoneNote').textContent = `Een specialist belt je op ${gekozenDag} om ${gekozenTijd} voor een exacte doorrekening. Tot snel!`;
   done.classList.remove('hidden');
@@ -1174,13 +1200,65 @@ async function annuleerAfspraak(){
   else { console.log('AFSPRAAK GEANNULEERD (nog geen cloud-koppeling of lead-id)'); }
   trackEvent('afspraak_geannuleerd');
 
+  // annulering onthouden
+  leadState.warm = false; leadState.warmVoorkeur = ''; bewaarStatus();
+
   gekozenDag = null; gekozenTijd = null;
   document.getElementById('specialistDone').classList.add('hidden');
-  const blok = document.getElementById('specialistBlok');
+  const blok = document.getElementById('adviesUpgrade');
   blok.classList.remove('hidden');
-  document.getElementById('specialistBtn').classList.remove('hidden');
   blok.scrollIntoView({behavior:'smooth', block:'center'});
 }
+
+function scrollNaarAdvies(){
+  document.getElementById('thanksCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// Bij terugkomst op de site: opgeslagen advies + afspraak weer tonen,
+// zodat mensen kunnen annuleren/wijzigen en we geen dubbele leads krijgen.
+function herstelStatus(){
+  let s;
+  try{ s = JSON.parse(localStorage.getItem(OPSLAG_KEY) || 'null'); }catch(e){ s = null; }
+  if(!s || !s.leadId || !s.berekening || s.berekening.piekdagKwh == null) return;
+
+  leadState = s;
+  laatsteLeadId = s.leadId;
+  laatsteBerekening = s.berekening;
+  if(s.form){
+    if(s.form.adres) geocodedAdres = s.form.adres;
+    const vn = document.getElementById('l_voornaam'); if(vn && s.form.voornaam) vn.value = s.form.voornaam;
+    const an = document.getElementById('l_achternaam'); if(an && s.form.achternaam) an.value = s.form.achternaam;
+    const tel = document.getElementById('l_telefoon'); if(tel && s.form.telefoon) tel.value = s.form.telefoon;
+  }
+
+  const cap = aanbevolenCapaciteit(s.berekening.piekdagKwh);
+  document.getElementById('advies').classList.remove('hidden');
+  document.getElementById('leadForm').classList.add('hidden');
+  document.getElementById('batKwh').textContent = cap;
+  document.getElementById('batNote').textContent = `Op basis van je piekdag van ${s.berekening.piekdagKwh} kWh teruglevering — groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
+  document.getElementById('thanksCard').classList.remove('hidden');
+
+  if(s.warm){
+    document.getElementById('adviesUpgrade').classList.add('hidden');
+    document.getElementById('specialistDoneNote').textContent = `Een specialist belt je op ${s.warmVoorkeur} voor een exacte doorrekening. Tot snel!`;
+    document.getElementById('specialistDone').classList.remove('hidden');
+  } else {
+    document.getElementById('adviesUpgrade').classList.remove('hidden');
+    document.getElementById('specialistDone').classList.add('hidden');
+  }
+
+  // batterij direct gevuld tonen (geen lange oplaadanimatie bij terugkeer)
+  document.querySelectorAll('#batBody .bat-seg').forEach(seg=>seg.classList.add('on'));
+  const bolt = document.getElementById('batBolt'); if(bolt) bolt.classList.add('on');
+  const body = document.getElementById('batBody'); if(body) body.classList.add('full');
+
+  // welkom-terug balk bovenaan
+  document.getElementById('terugTekst').textContent = s.warm
+    ? `Welkom terug — je belafspraak (${s.warmVoorkeur}) staat klaar.`
+    : 'Welkom terug — je batterij-advies staat klaar.';
+  document.getElementById('terugBar').classList.remove('hidden');
+}
+document.addEventListener('DOMContentLoaded', herstelStatus);
 
 // Laat de batterij vak-voor-vak "opladen" en toon daarna de bliksem.
 function laadBatterijAnimatie(){
