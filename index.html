@@ -370,7 +370,7 @@
           <div class="chip" data-val="5000"><span class="ct">Veel</span><span class="cs">± 5.000 kWh</span></div>
         </div>
         <div class="field" style="margin-top:9px;">
-          <input id="c_verbruikExact" type="number" min="500" max="30000" inputmode="numeric" placeholder="Weet je het exact? Vul het hier in" oninput="exactVerbruikGewijzigd()">
+          <input id="c_verbruikExact" type="number" min="500" max="30000" inputmode="numeric" placeholder="Weet je het exact? Vul het hier in" oninput="exactVerbruikGewijzigd()" onfocus="exactVerbruikFocus()" onblur="exactVerbruikBlur()">
           <span class="unit">kWh/jaar</span>
         </div>
 
@@ -825,17 +825,24 @@ document.getElementById('verbruikChips').addEventListener('click', e=>{
   document.getElementById('c_verbruikExact').value = '';
   if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen); // direct herberekenen, geen laadanimatie nodig
 });
-// exact veld gewijzigd: knopjes deselecteren zolang er een eigen getal staat,
-// en herberekenen als er al een uitkomst staat
+// Het exact-veld is een volwaardige vierde keuze: zodra je erin klikt,
+// springen de knopjes uit. Klik je later toch weer een knopje, dan
+// wist dat het exact-veld (dat gebeurt bij de chip-klik zelf).
+function exactVerbruikFocus(){
+  document.querySelectorAll('#verbruikChips .chip').forEach(c=>c.classList.remove('active'));
+}
+// tijdens typen: herberekenen als er al een uitkomst staat
 function exactVerbruikGewijzigd(){
+  if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen);
+}
+// verlaat je het veld leeg (geen geldig getal), val dan terug op 'Gemiddeld'
+function exactVerbruikBlur(){
   const v = parseInt(document.getElementById('c_verbruikExact').value);
   const chips = document.querySelectorAll('#verbruikChips .chip');
-  if(v && v >= 500){
-    chips.forEach(c=>c.classList.remove('active'));
-  } else if(![...chips].some(c=>c.classList.contains('active'))){
-    if(chips[1]) chips[1].classList.add('active'); // terug naar 'Gemiddeld' als het veld leeg is
+  if((!v || v < 500) && ![...chips].some(c=>c.classList.contains('active'))){
+    if(chips[1]) chips[1].classList.add('active');
+    if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen);
   }
-  if(laatsteBerekening) voerBerekeningUit(laatsteBerekening.panelen);
 }
 document.getElementById('eigenaarChips').addEventListener('click', e=>{
   const chip = e.target.closest('.chip');
