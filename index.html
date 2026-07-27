@@ -520,7 +520,7 @@
       <div class="step">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 7-8"/><path d="M17 4h4v4"/><path d="M4 21h16"/></svg></div>
         <h3>Slim handelen in stroom</h3>
-        <p>Met een dynamisch contract laadt je batterij op als stroom goedkoop is en levert 'ie terug als de prijs hoog is. Zo verdien je aan het prijsverschil — bovenop je besparing.</p>
+        <p>Met een dynamisch contract laadt je batterij op als stroom goedkoop is en levert 'ie terug als de prijs hoog is. Zo verdien je aan het prijsverschil — bovenop je besparing. Daarmee ligt de terugverdientijd vaak op 3 tot 7 jaar, tegenover 6 tot 9 jaar zonder dynamisch contract.</p>
       </div>
     </div>
     <div class="keep-line">
@@ -555,6 +555,7 @@
           <label for="l_telefoon" style="font-size:15px;">Telefoonnummer</label>
           <input id="l_telefoon" type="tel" placeholder="06 12 34 56 78" autocomplete="tel" style="font-size:19px; font-weight:700; padding:15px 16px;">
           <p class="tel-note">Met je telefoonnummer kunnen we je bellen voor vrijblijvend advies over een thuisbatterij.</p>
+          <p class="tel-note hidden" id="telHint" style="color:var(--lose); font-weight:600;">Controleer je telefoonnummer — dit lijkt nog geen geldig nummer.</p>
 
           <label for="l_voornaam">Voornaam</label>
           <input id="l_voornaam" placeholder="Voornaam" autocomplete="given-name">
@@ -684,7 +685,7 @@
       </details>
       <details>
         <summary>Wat kost een thuisbatterij ongeveer? <span class="pm"></span></summary>
-        <div class="faq-body">Dat hangt af van de gewenste capaciteit en je situatie. Vul je piekdag in om te zien welke capaciteit bij je past — en bel ons vrijblijvend als je wilt weten wat die specifieke batterij kost en oplevert.</div>
+        <div class="faq-body">Richtprijzen incl. installatie: een kleine batterij van zo'n 5 kWh vanaf circa &euro;3.000, een gangbare 10 kWh-batterij &euro;5.500&ndash;&euro;8.500, en grotere systemen van 15 kWh kunnen oplopen tot &euro;12.000. Bij normaal gebruik verdien je die investering gemiddeld in 6 tot 9 jaar terug; met een dynamisch energiecontract kan dat sneller. Vul je piekdag in om te zien welke capaciteit bij jóú past, en bel ons vrijblijvend voor een exacte prijsopgave voor jouw situatie.</div>
       </details>
       <details>
         <summary>Wat gebeurt er met mijn gegevens? <span class="pm"></span></summary>
@@ -706,7 +707,7 @@
   <div class="wrap">
     <div class="disc">
       <strong style="color:var(--on-ink);">Salderingscheck</strong> — gratis &amp; vrijblijvend advies over thuisbatterijen.<br><br>
-      Alle bedragen zijn indicatief en gebaseerd op gemiddelden (~340 kWh per paneel per jaar, ~30% eigen verbruik zonder batterij volgens Milieu Centraal, een all-in stroomtarief van &euro;0,26/kWh en een kaal leveringstarief van &euro;0,10/kWh volgens CBS, januari 2026) en op de <em>Wet be&euml;indiging salderingsregeling</em> (terugleververgoeding minimaal 50% van het kale tarief, eerste 3 jaar). De 10-jaarsprojectie gaat uit van gelijkblijvende tarieven en is puur indicatief. Je werkelijke situatie kan afwijken; dit is geen persoonlijk financieel advies.
+      Alle bedragen zijn indicatief en gebaseerd op gemiddelden (~340 kWh per paneel per jaar, ~30% eigen verbruik zonder batterij volgens Milieu Centraal, een all-in stroomtarief van &euro;0,26/kWh en een kaal leveringstarief van &euro;0,10/kWh volgens CBS, januari 2026) en op de <em>Wet be&euml;indiging salderingsregeling</em> (terugleververgoeding minimaal 50% van het kale tarief, eerste 3 jaar). De 10-jaarsprojectie gaat uit van gelijkblijvende tarieven en is puur indicatief. Genoemde batterijprijzen en terugverdientijden zijn eveneens indicaties op basis van actuele marktprijzen begin 2026 en kunnen per leverancier, capaciteit en energiecontract afwijken. Je werkelijke situatie kan afwijken; dit is geen persoonlijk financieel advies.
     </div>
   </div>
   <div class="footer-bedrijf">
@@ -1068,11 +1069,23 @@ async function kiesAdres(i){
   updateSubmitState();
 }
 
+// lichte sanity-check: geen exacte NL-nummervalidatie (te streng risicovol
+// voor echte leads), maar wel genoeg om onzin als "asdf" of "123" te weren
+function telefoonGeldig(v){
+  const cijfers = (v || '').replace(/[^\d]/g, '');
+  return cijfers.length >= 9 && cijfers.length <= 13;
+}
 function updateSubmitState(){
   const consent = document.getElementById('l_consent').checked;
-  document.getElementById('submitBtn').disabled = !consent || !geocodedAdres;
+  const telefoon = document.getElementById('l_telefoon').value.trim();
+  const telOk = telefoonGeldig(telefoon);
+  document.getElementById('submitBtn').disabled = !consent || !geocodedAdres || !telOk;
+  const hint = document.getElementById('telHint');
+  if(hint) hint.classList.toggle('hidden', telOk || !telefoon);
 }
 document.getElementById('l_consent').addEventListener('change', updateSubmitState);
+document.getElementById('l_telefoon').addEventListener('input', updateSubmitState);
+document.getElementById('l_telefoon').addEventListener('blur', updateSubmitState);
 
 /* ══════════════════════════════════════════════════════════════
    LEAD VERSTUREN — wordt gekoppeld aan Firebase (window.leadSync);
@@ -1090,7 +1103,7 @@ async function verstuurLead(){
   const achternaam = document.getElementById('l_achternaam').value.trim();
   const telefoon = document.getElementById('l_telefoon').value.trim();
   if(!voornaam || !achternaam){ alert('Vul je voor- en achternaam in.'); return; }
-  if(!telefoon){ alert('Vul je telefoonnummer in.'); return; }
+  if(!telefoonGeldig(telefoon)){ alert('Vul een geldig telefoonnummer in.'); return; }
   if(!geocodedAdres){ alert('Kies je adres uit de suggesties.'); return; }
 
   const naam = `${voornaam} ${achternaam}`;
