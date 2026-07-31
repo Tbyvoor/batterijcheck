@@ -636,7 +636,7 @@
 
           <label for="l_telefoon">Telefoonnummer</label>
           <input id="l_telefoon" type="tel" placeholder="06 12 34 56 78" autocomplete="tel">
-          <p class="tel-note">Met je telefoonnummer kunnen we je bellen voor gratis, vrijblijvend advies.</p>
+          <p class="tel-note">Je telefoonnummer gebruiken we alleen om vrijblijvend contact met je op te nemen over je advies.</p>
           <p class="tel-note hidden" id="telHint" style="color:var(--lose); font-weight:600;">Controleer je telefoonnummer, dit lijkt nog geen geldig nummer.</p>
 
           <label for="l_postcode">Postcode &amp; huisnummer</label>
@@ -652,7 +652,7 @@
 
           <label class="consent">
             <input type="checkbox" id="l_consent">
-            <span>Ik geef toestemming om <strong>een keer</strong> gebeld te worden voor vrijblijvend advies over een thuisbatterij. Zie de <a href="privacy.html" target="_blank" rel="noopener">privacyverklaring</a>.</span>
+            <span>Ik geef toestemming dat Salderingscheck <strong>vrijblijvend</strong> contact met mij opneemt voor advies over een thuisbatterij. Zie de <a href="privacy.html" target="_blank" rel="noopener">privacyverklaring</a>.</span>
           </label>
 
           <button class="btn btn-solar" id="submitBtn" onclick="verstuurLead()" disabled style="margin-top:18px;">
@@ -661,7 +661,7 @@
           </button>
           <div class="privacy-note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-            We bellen alleen jou. Geen spam, je gegevens worden niet doorverkocht.
+            Vrijblijvend en zonder spam. Je gegevens worden niet doorverkocht.
           </div>
         </div>
 
@@ -746,7 +746,7 @@
       </details>
       <details>
         <summary>Wat gebeurt er met mijn gegevens? <span class="pm"></span></summary>
-        <div class="faq-body">Met je telefoonnummer kunnen we je bellen voor vrijblijvend advies over een thuisbatterij, meer niet. We verkopen je gegevens niet door en je kunt je altijd weer afmelden. Lees de volledige <a href="privacy.html">privacyverklaring</a>.</div>
+        <div class="faq-body">Met je telefoonnummer nemen we vrijblijvend contact met je op voor advies over een thuisbatterij, meer niet. We verkopen je gegevens niet door en je kunt je altijd weer afmelden. Lees de volledige <a href="privacy.html">privacyverklaring</a>.</div>
       </details>
     </div>
   </div>
@@ -1453,7 +1453,7 @@ function herstelStatus(){
 
   // welkom-terug balk bovenaan, met knop naar het advies
   document.getElementById('terugTekst').textContent = s.warm
-    ? `Welkom terug! Je belafspraak (${s.warmVoorkeur}) staat klaar.`
+    ? `Welkom terug! Je adviesgesprek (${s.warmVoorkeur}) staat klaar.`
     : 'Welkom terug! Je persoonlijke advies staat klaar.';
   document.getElementById('terugBar').classList.remove('hidden');
 }
