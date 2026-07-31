@@ -611,11 +611,11 @@
     <div class="lead-grid">
       <div class="lead-copy">
         <h2>Je persoonlijke advies staat klaar.</h2>
-        <p>Rond deze laatste stap af, dan zie je direct welke batterijcapaciteit bij jouw teruglevering past. En je zit nergens aan vast.</p>
+        <p>Rond deze laatste stap af, dan stellen we direct je volledige advies voor je samen. Daarin lees je onder andere:</p>
         <div class="howto">
-          <div class="row"><div class="num">&#10003;</div><div><b>100% gratis</b><span>Je betaalt niets en zit nergens aan vast.</span></div></div>
-          <div class="row"><div class="num">&#10003;</div><div><b>Geen spam</b><span>We bellen je één keer voor advies, meer niet. Je gegevens gaan niet naar derden.</span></div></div>
-          <div class="row"><div class="num">&#10003;</div><div><b>Jij houdt de regie</b><span>Je kunt je altijd afmelden of je gegevens laten verwijderen.</span></div></div>
+          <div class="row"><div class="num">&#10003;</div><div><b>Wat de salderingsstop jou kost</b><span>Je persoonlijke verlies per jaar en over tien jaar.</span></div></div>
+          <div class="row"><div class="num">&#10003;</div><div><b>Welke batterijcapaciteit bij je past</b><span>Afgestemd op jouw eigen teruglevering.</span></div></div>
+          <div class="row"><div class="num">&#10003;</div><div><b>De soorten thuisbatterijen op een rij</b><span>Zodat je goed geïnformeerd een keuze kunt maken.</span></div></div>
         </div>
       </div>
 
@@ -709,16 +709,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<section class="proof">
-  <div class="wrap">
-    <div class="proof-stats">
-      <div class="st"><b class="tnum">2027</b><span>Saldering stopt definitief</span></div>
-      <div class="st"><b class="tnum">2 min</b><span>Meer tijd kost het niet</span></div>
-      <div class="st"><b class="tnum">~70%</b><span>Van je opwek lever je nu terug</span></div>
     </div>
   </div>
 </section>
@@ -1262,37 +1252,21 @@ async function verstuurLead(){
   bewaarStatus();
   trackEvent('lead');
 
-  document.getElementById('leadForm').classList.add('hidden');
-  document.getElementById('piekdagBlok').classList.add('hidden');
-
-  // Toon het echte batterijadvies meteen op de site, zoals gevraagd —
-  // gebaseerd op de zelf opgegeven piekdag-teruglevering, afgerond naar
-  // de eerstvolgende standaard batterijmaat.
+  // Advies-gegevens klaarzetten en doorsturen naar de uitgebreide advies-pagina
   const capaciteit = aanbevolenCapaciteit(laatsteBerekening.piekdagKwh);
-
-  // 1) de teaser in de rekenkaart ontgrendelen
-  const teaser = document.getElementById('teaserCard');
-  teaser.classList.remove('hidden');
-  teaser.classList.add('unlocked');
-  document.getElementById('teaserCapaciteit').textContent = `${capaciteit} kWh`;
-  document.getElementById('teaserNote').textContent = `Op basis van je piekdag van ${laatsteBerekening.piekdagKwh} kWh teruglevering.`;
-
-  // 2) de grote onthulling in de bedankt-kaart, met batterij-animatie
-  document.getElementById('batKwh').textContent = capaciteit;
-  document.getElementById('batNote').textContent = `Op basis van je piekdag van ${laatsteBerekening.piekdagKwh} kWh teruglevering, groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
-  // specialist-boeking terugzetten naar begintoestand
-  document.getElementById('adviesUpgrade').classList.remove('hidden');
-  document.getElementById('specialistDone').classList.add('hidden');
-
-  const thanks = document.getElementById('thanksCard');
-  thanks.classList.remove('hidden');
-  // naar de bovenkant van het advies: je ziet eerst je batterij
-  thanks.scrollIntoView({behavior:'smooth', block:'start'});
-  laadBatterijAnimatie();
-
-  // kort na de onthulling springt de waarschuwing + afspraak in beeld
-  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  setTimeout(toonAdviesPopup, reduce ? 500 : 1500);
+  const adviesData = {
+    voornaam, naam, leadId: laatsteLeadId,
+    verliesPerJaar: laatsteBerekening.verliesPerJaar,
+    verlies10jaar: laatsteBerekening.verlies10jaar,
+    opwek: laatsteBerekening.opwek,
+    surplus: Math.round(laatsteBerekening.surplus),
+    panelen: laatsteBerekening.panelen,
+    piekdagKwh: laatsteBerekening.piekdagKwh,
+    capaciteit,
+    tijd: new Date().toISOString()
+  };
+  try{ localStorage.setItem('bc_advies', JSON.stringify(adviesData)); }catch(e){}
+  window.location.href = 'advies.html';
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1440,12 +1414,10 @@ async function annuleerAfspraak(){
   blok.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
-function scrollNaarAdvies(){
-  document.getElementById('thanksCard').scrollIntoView({behavior:'smooth', block:'start'});
-}
+function scrollNaarAdvies(){ window.location.href = 'advies.html'; }
 
-// Bij terugkomst op de site: opgeslagen advies + afspraak weer tonen,
-// zodat mensen kunnen annuleren/wijzigen en we geen dubbele leads krijgen.
+// Bij terugkomst op de site: het opgeslagen advies opnieuw klaarzetten voor de
+// advies-pagina en een welkom-terug balk tonen (voorkomt ook dubbele leads).
 function herstelStatus(){
   let s;
   try{ s = JSON.parse(localStorage.getItem(OPSLAG_KEY) || 'null'); }catch(e){ s = null; }
@@ -1461,31 +1433,28 @@ function herstelStatus(){
     const tel = document.getElementById('l_telefoon'); if(tel && s.form.telefoon) tel.value = s.form.telefoon;
   }
 
+  // advies opnieuw opslaan voor de aparte advies-pagina
   const cap = aanbevolenCapaciteit(s.berekening.piekdagKwh);
-  document.getElementById('advies').classList.remove('hidden');
-  document.getElementById('leadForm').classList.add('hidden');
-  document.getElementById('batKwh').textContent = cap;
-  document.getElementById('batNote').textContent = `Op basis van je piekdag van ${s.berekening.piekdagKwh} kWh teruglevering, groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
-  document.getElementById('thanksCard').classList.remove('hidden');
+  const adviesData = {
+    voornaam: (s.form && s.form.voornaam) || '',
+    naam: s.form ? `${s.form.voornaam || ''} ${s.form.achternaam || ''}`.trim() : '',
+    leadId: s.leadId,
+    verliesPerJaar: s.berekening.verliesPerJaar,
+    verlies10jaar: s.berekening.verlies10jaar,
+    opwek: s.berekening.opwek,
+    surplus: Math.round(s.berekening.surplus),
+    panelen: s.berekening.panelen,
+    piekdagKwh: s.berekening.piekdagKwh,
+    capaciteit: cap,
+    tijd: new Date().toISOString()
+  };
+  if(s.warm){ adviesData.warmVoorkeur = s.warmVoorkeur; }
+  try{ localStorage.setItem('bc_advies', JSON.stringify(adviesData)); }catch(e){}
 
-  if(s.warm){
-    document.getElementById('adviesUpgrade').classList.add('hidden');
-    document.getElementById('specialistDoneNote').textContent = `Een specialist belt je op ${s.warmVoorkeur} voor een exacte doorrekening. Tot snel!`;
-    document.getElementById('specialistDone').classList.remove('hidden');
-  } else {
-    document.getElementById('adviesUpgrade').classList.remove('hidden');
-    document.getElementById('specialistDone').classList.add('hidden');
-  }
-
-  // batterij direct gevuld tonen (geen lange oplaadanimatie bij terugkeer)
-  document.querySelectorAll('#batBody .bat-seg').forEach(seg=>seg.classList.add('on'));
-  const bolt = document.getElementById('batBolt'); if(bolt) bolt.classList.add('on');
-  const body = document.getElementById('batBody'); if(body) body.classList.add('full');
-
-  // welkom-terug balk bovenaan
+  // welkom-terug balk bovenaan, met knop naar het advies
   document.getElementById('terugTekst').textContent = s.warm
     ? `Welkom terug! Je belafspraak (${s.warmVoorkeur}) staat klaar.`
-    : 'Welkom terug! Je batterij-advies staat klaar.';
+    : 'Welkom terug! Je persoonlijke advies staat klaar.';
   document.getElementById('terugBar').classList.remove('hidden');
 }
 document.addEventListener('DOMContentLoaded', herstelStatus);
