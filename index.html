@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wat kost de salderingsstop jou? — Bereken het gratis</title>
+<title>Wat kost de salderingsstop jou? Bereken het gratis</title>
 <meta name="description" content="Vanaf 1 januari 2027 stopt de salderingsregeling. Bereken in 30 seconden wat dit jou per jaar kost en hoe een thuisbatterij dat grotendeels voorkomt.">
 <meta name="theme-color" content="#0d1526">
 <meta name="facebook-domain-verification" content="t1ca0fcxynkq12kwzhbdm693wubte5" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts.css">
 <style>
   :root{
     --ink:#0d1526;          /* nacht-navy: donkere secties */
@@ -70,14 +68,14 @@
     background-image:linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
     background-size:38px 38px; mask-image:linear-gradient(180deg, #000, transparent 75%);
   }
-  .hero .wrap{ position:relative; z-index:2; }
+  .hero .wrap{ position:relative; z-index:2; text-align:center; }
   .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--solar); background:rgba(255,179,0,.1); border:1px solid rgba(255,179,0,.28); padding:6px 13px; border-radius:100px; }
   .eyebrow .dot{ width:7px; height:7px; border-radius:50%; background:var(--solar); box-shadow:0 0 0 0 rgba(255,179,0,.6); animation:pulse 2.2s infinite; }
   @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(255,179,0,.5);} 70%{box-shadow:0 0 0 8px rgba(255,179,0,0);} 100%{box-shadow:0 0 0 0 rgba(255,179,0,0);} }
-  .hero h1{ font-family:var(--fd); font-weight:800; font-size:clamp(30px, 6vw, 52px); line-height:1.04; letter-spacing:-1.4px; margin:20px 0 0; max-width:15ch; text-wrap:balance; }
+  .hero h1{ font-family:var(--fd); font-weight:800; font-size:clamp(30px, 6vw, 52px); line-height:1.04; letter-spacing:-1.4px; margin:20px auto 0; max-width:17ch; text-wrap:balance; }
   .hero h1 .hl{ color:var(--solar); }
-  .hero .lede{ font-size:clamp(16px,2.2vw,19px); color:var(--on-ink-dim); max-width:46ch; margin-top:18px; line-height:1.5; }
-  .hero-badges{ display:flex; flex-wrap:wrap; gap:18px; margin-top:24px; }
+  .hero .lede{ font-size:clamp(16px,2.2vw,19px); color:var(--on-ink-dim); max-width:46ch; margin:18px auto 0; line-height:1.5; }
+  .hero-badges{ display:flex; flex-wrap:wrap; gap:18px; margin-top:24px; justify-content:center; }
   .hero-badges span{ display:inline-flex; align-items:center; gap:8px; font-size:13.5px; color:var(--on-ink-dim); font-weight:500; }
   .hero-badges svg{ width:17px; height:17px; color:var(--keep); flex-shrink:0; }
 
@@ -176,6 +174,14 @@
   .io-fade.in{ opacity:1; transform:none; }
   @media (prefers-reduced-motion: reduce){ .io-fade{ opacity:1; transform:none; transition:none; } }
 
+  /* ── Oplossing-brug: legt na het verlies uit wat een thuisbatterij doet ── */
+  .solution-bridge{ margin-top:18px; padding:18px 18px 20px; background:rgba(255,179,0,.08); border:1px solid rgba(255,179,0,.32); border-radius:14px; }
+  .solution-bridge .sb-head{ display:flex; align-items:center; gap:9px; font-family:var(--fd); font-weight:800; font-size:15px; color:var(--on-ink); line-height:1.25; }
+  .solution-bridge .sb-head svg{ width:21px; height:21px; color:var(--solar); flex-shrink:0; }
+  .solution-bridge p{ font-size:13.5px; color:var(--on-ink-dim); line-height:1.55; margin:11px 0 16px; }
+  .solution-bridge p b{ color:var(--on-ink); }
+  .solution-bridge .btn{ width:100%; }
+
   /* ── Piekdag-vraag (tussenstap vóór het batterij-advies) ── */
   .piekdag{ margin-top:16px; padding:18px 17px; background:rgba(255,255,255,.06); border:1px solid var(--border-ink); border-radius:12px; }
   .piekdag label{ color:var(--on-ink); font-size:14px; margin-top:0; }
@@ -203,7 +209,7 @@
 
   /* ── Secties ── */
   section{ padding:64px 0; }
-  .sec-head{ max-width:32ch; }
+  .sec-head{ max-width:36ch; margin:0 auto; text-align:center; }
   .sec-tag{ font-family:var(--fd); font-weight:700; font-size:12.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--solar-deep); }
   .sec-head h2{ font-family:var(--fd); font-weight:800; font-size:clamp(26px,4vw,38px); letter-spacing:-1px; line-height:1.1; margin:8px 0 0; text-wrap:balance; }
   .sec-head p{ color:var(--text2); font-size:16.5px; margin-top:12px; }
@@ -220,6 +226,21 @@
   .step p{ font-size:14.5px; color:var(--text2); margin-top:6px; }
   .keep-line{ margin-top:28px; display:inline-flex; align-items:center; gap:10px; background:var(--keep-bg); color:#0a7d54; font-weight:600; font-size:15px; padding:13px 18px; border-radius:12px; }
   .keep-line svg{ width:20px; height:20px; flex-shrink:0; }
+
+  /* Stroomhandel-sectie */
+  .trade{ background:var(--ink); color:var(--on-ink); }
+  .trade-grid{ display:grid; grid-template-columns:1fr; gap:32px; align-items:center; }
+  @media(min-width:860px){ .trade-grid{ grid-template-columns:1.05fr 1fr; gap:52px; } }
+  .trade-copy{ text-align:left; }
+  .trade-copy h2{ font-family:var(--fd); font-weight:800; font-size:clamp(26px,4vw,38px); letter-spacing:-1px; line-height:1.1; text-wrap:balance; margin-top:8px; }
+  .trade-copy > p{ color:var(--on-ink-dim); font-size:16.5px; margin-top:16px; line-height:1.6; }
+  .trade-copy p.trade-foot{ margin-top:20px; background:rgba(255,179,0,.1); border:1px solid rgba(255,179,0,.3); border-radius:12px; padding:13px 17px; color:var(--on-ink); font-size:15px; font-weight:600; line-height:1.5; }
+  .trade-points{ display:flex; flex-direction:column; gap:13px; }
+  .tp{ display:flex; gap:15px; align-items:flex-start; background:rgba(255,255,255,.05); border:1px solid var(--border-ink); border-radius:14px; padding:17px 18px; }
+  .tp-ico{ flex-shrink:0; width:42px; height:42px; border-radius:11px; background:rgba(255,179,0,.14); display:flex; align-items:center; justify-content:center; }
+  .tp-ico svg{ width:22px; height:22px; color:var(--solar); }
+  .tp b{ font-family:var(--fd); font-weight:700; font-size:16px; color:var(--on-ink); display:block; letter-spacing:-.2px; }
+  .tp span{ font-size:13.5px; color:var(--on-ink-dim); display:block; margin-top:3px; line-height:1.5; }
 
   /* Leadformulier */
   .lead{ background:var(--ink); color:var(--on-ink); }
@@ -366,6 +387,17 @@
   .footer-bedrijf-inner > *:not(:last-child)::after{ content:''; position:absolute; right:-11px; top:50%; transform:translateY(-50%); width:3px; height:3px; border-radius:50%; background:var(--on-ink-dim); opacity:.5; }
   footer a{ color:var(--on-ink); }
 
+  /* ── Cookietoestemming (voor Microsoft Clarity) ── */
+  .consent-bar{ position:fixed; left:0; right:0; bottom:0; z-index:1800; background:var(--ink); color:var(--on-ink); border-top:1px solid var(--border-ink); box-shadow:0 -10px 34px -14px rgba(0,0,0,.55); padding:16px 20px; }
+  .consent-inner{ max-width:1080px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; gap:12px 22px; justify-content:space-between; }
+  .consent-text{ font-size:13px; color:var(--on-ink-dim); line-height:1.5; max-width:64ch; }
+  .consent-text a{ color:var(--solar); text-decoration:underline; }
+  .consent-acties{ display:flex; gap:10px; flex-shrink:0; }
+  .consent-acties button{ font-family:var(--fd); font-weight:700; font-size:13.5px; padding:10px 18px; border-radius:10px; cursor:pointer; border:none; transition:filter .14s; }
+  .consent-acties button:hover{ filter:brightness(1.08); }
+  .consent-weiger{ background:transparent; color:var(--on-ink-dim); border:1px solid var(--border-ink); }
+  .consent-accept{ background:var(--solar); color:#231600; }
+
   .hidden{ display:none !important; }
   :focus-visible{ outline:3px solid var(--solar); outline-offset:2px; border-radius:6px; }
 
@@ -377,7 +409,7 @@
 
 <!-- Verschijnt alleen bij terugkerende bezoekers met een opgeslagen advies -->
 <div class="terug-bar hidden" id="terugBar">
-  <span id="terugTekst">Welkom terug — je batterij-advies staat klaar.</span>
+  <span id="terugTekst">Welkom terug! Je batterij-advies staat klaar.</span>
   <button type="button" onclick="scrollNaarAdvies()">Bekijk &amp; beheer</button>
 </div>
 
@@ -402,7 +434,7 @@
   <div class="wrap">
     <span class="eyebrow"><span class="dot"></span>Wetswijziging · 1 januari 2027</span>
     <h1>Straks krijg je bijna <span class="hl">niets</span> meer voor je eigen zonnestroom.</h1>
-    <p class="lede">De salderingsregeling stopt definitief. Reken in 30 seconden uit wat dat jóú per jaar kost — en hoe je het grootste deel ervan houdt.</p>
+    <p class="lede">De salderingsregeling stopt definitief. Reken in 30 seconden uit wat dat jóú per jaar kost, en hoe je het grootste deel ervan houdt.</p>
     <div class="hero-badges">
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Gratis &amp; vrijblijvend</span>
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Geen account nodig</span>
@@ -422,7 +454,7 @@
 
         <label for="c_panelen">Hoeveel zonnepanelen heb je?</label>
         <div class="field">
-          <input id="c_panelen" type="number" min="1" max="60" inputmode="numeric" placeholder="Bijv. 12">
+          <input id="c_panelen" type="number" min="0" max="60" inputmode="numeric" placeholder="Bijv. 12">
           <span class="unit">panelen</span>
         </div>
 
@@ -464,6 +496,18 @@
             <div><b class="tnum" id="resSurplus">0</b><span>kWh die je teruglevert</span></div>
           </div>
 
+          <div class="solution-bridge hidden" id="solutionBridge">
+            <div class="sb-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 10v4"/><path d="M8 9l-2 3h4l-2 3"/></svg>
+              Dit verlies is grotendeels te voorkomen
+            </div>
+            <p>Een <b>thuisbatterij</b> bewaart de stroom die je overdag opwekt, zodat je 'm 's avonds zelf gebruikt in plaats van 'm bijna gratis terug te leveren. Zo houd je het grootste deel van je opbrengst in eigen zak.</p>
+            <button class="btn btn-solar" id="bridgeBtn" onclick="startBatterijAdvies()">
+              Blijf winst maken met een thuisbatterij
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+
           <div class="piekdag hidden" id="piekdagBlok">
             <div class="stepper"><span class="sdot on"></span><span class="sdot on"></span><span class="sdot"></span><span class="slbl">Stap 2 van 3</span></div>
             <label for="p_piekdag">Wat is je hoogste teruglevering op één dag?</label>
@@ -471,9 +515,9 @@
               <input id="p_piekdag" type="number" min="1" step="0.1" inputmode="decimal" placeholder="Bijv. 12">
               <span class="unit">kWh</span>
             </div>
-            <p class="piekdag-hint">Dit zie je in de app van je zonnepanelen of omvormer (bijv. Enphase, SolarEdge, GoodWe) — kijk bij je dag-teruglevering en pak de hoogste dag. Ook je energieleverancier-app toont dit vaak bij "teruglevering per dag".</p>
+            <p class="piekdag-hint">Dit zie je in de app van je zonnepanelen of omvormer (bijv. Enphase, SolarEdge, GoodWe). Kijk bij je dag-teruglevering en pak de hoogste dag. Ook je energieleverancier-app toont dit vaak bij "teruglevering per dag".</p>
             <button class="btn-ghost" onclick="gebruikSchatting()">Weet je het niet precies? Gebruik onze schatting: <b id="piekdagSchatting">—</b> kWh</button>
-            <button class="btn btn-ink" style="margin-top:10px;" onclick="toonLeadForm()">
+            <button class="btn btn-ink" id="adviesBtn" style="margin-top:10px;" onclick="toonLeadForm()">
               Bekijk mijn batterij-advies →
             </button>
           </div>
@@ -499,7 +543,7 @@
     <div class="sec-head">
       <div class="sec-tag">De oplossing</div>
       <h2>Een thuisbatterij draait het verlies om.</h2>
-      <p>Overdag bewaar je je opgewekte stroom in de batterij, en 's avonds gebruik je 'm zelf. Zo lever je veel minder terug tegen dat lage tarief — en houd je je opbrengst grotendeels in eigen zak.</p>
+      <p>Overdag bewaar je je opgewekte stroom in de batterij, en 's avonds gebruik je 'm zelf. Zo lever je veel minder terug tegen dat lage tarief, en houd je je opbrengst grotendeels in eigen zak.</p>
     </div>
     <div class="steps">
       <div class="step">
@@ -520,7 +564,7 @@
       <div class="step">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 7-8"/><path d="M17 4h4v4"/><path d="M4 21h16"/></svg></div>
         <h3>Slim handelen in stroom</h3>
-        <p>Met een dynamisch contract laadt je batterij op als stroom goedkoop is en levert 'ie terug als de prijs hoog is. Zo verdien je aan het prijsverschil — bovenop je besparing. Daarmee ligt de terugverdientijd vaak op 3 tot 7 jaar, tegenover 6 tot 9 jaar zonder dynamisch contract.</p>
+        <p>Met een dynamisch contract laadt je batterij op als stroom goedkoop is en levert 'ie terug als de prijs hoog is. Zo verdien je aan het prijsverschil, bovenop je besparing.</p>
       </div>
     </div>
     <div class="keep-line">
@@ -530,12 +574,39 @@
   </div>
 </section>
 
+<section class="trade">
+  <div class="wrap">
+    <div class="trade-grid">
+      <div class="trade-copy">
+        <div class="sec-tag" style="color:var(--solar);">Extra verdienen</div>
+        <h2>Je batterij <span style="color:var(--solar);">verhandelt</span> ook stroom.</h2>
+        <p>Een slimme thuisbatterij bespaart niet alleen, hij verdient ook. Met een dynamisch energiecontract koopt je batterij stroom in wanneer die goedkoop is (op zonnige en winderige dagen zakt de prijs zelfs onder nul) en levert 'm terug wanneer de prijs piekt. Dat prijsverschil is pure winst, bovenop wat je al bespaart met je eigen zonnestroom.</p>
+        <p class="trade-foot">Daardoor verdient een batterij zichzelf vaak in 3 tot 7 jaar terug, in plaats van 6 tot 9 jaar zonder handel.</p>
+      </div>
+      <div class="trade-points">
+        <div class="tp">
+          <div class="tp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v14"/><path d="M6 11l6 6 6-6"/><path d="M5 21h14"/></svg></div>
+          <div><b>Laden als stroom goedkoop is</b><span>Je batterij vult zich tijdens de goedkoopste (soms zelfs gratis) uren van de dag.</span></div>
+        </div>
+        <div class="tp">
+          <div class="tp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V7"/><path d="M6 13l6-6 6 6"/><path d="M5 3h14"/></svg></div>
+          <div><b>Terugleveren als de prijs piekt</b><span>'s Avonds, als stroom duur is, gebruik of verkoop je je opgeslagen stroom tegen de hoge prijs.</span></div>
+        </div>
+        <div class="tp">
+          <div class="tp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 7-8"/><path d="M17 4h4v4"/></svg></div>
+          <div><b>Sneller terugverdiend</b><span>De handelswinst komt bovenop je besparing, zo betaalt je batterij zichzelf sneller af.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="lead hidden" id="advies">
   <div class="wrap">
     <div class="lead-grid">
       <div class="lead-copy">
         <h2>Nog één stap tot je advies.</h2>
-        <p>Vul je gegevens in en zie direct welke batterijcapaciteit bij jouw teruglevering past. Vrijblijvend — je zit nergens aan vast.</p>
+        <p>Vul je gegevens in en zie direct welke batterijcapaciteit bij jouw teruglevering past. Vrijblijvend, je zit nergens aan vast.</p>
         <div class="howto">
           <div class="row"><div class="num">1</div><div><b>Je vult je gegevens in</b><span>Duurt 20 seconden, geen verplichtingen.</span></div></div>
           <div class="row"><div class="num">2</div><div><b>Je ziet direct welke batterij bij je past</b><span>Op basis van je eigen teruglevering.</span></div></div>
@@ -555,7 +626,7 @@
           <label for="l_telefoon" style="font-size:15px;">Telefoonnummer</label>
           <input id="l_telefoon" type="tel" placeholder="06 12 34 56 78" autocomplete="tel" style="font-size:19px; font-weight:700; padding:15px 16px;">
           <p class="tel-note">Met je telefoonnummer kunnen we je bellen voor vrijblijvend advies over een thuisbatterij.</p>
-          <p class="tel-note hidden" id="telHint" style="color:var(--lose); font-weight:600;">Controleer je telefoonnummer — dit lijkt nog geen geldig nummer.</p>
+          <p class="tel-note hidden" id="telHint" style="color:var(--lose); font-weight:600;">Controleer je telefoonnummer, dit lijkt nog geen geldig nummer.</p>
 
           <label for="l_voornaam">Voornaam</label>
           <input id="l_voornaam" placeholder="Voornaam" autocomplete="given-name">
@@ -653,11 +724,11 @@
       <div class="quote benefit">
         <div class="q-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5c0 4.5 3.4 7.9 8 9.5 4.6-1.6 8-5 8-9.5v-5z"/><path d="M9 12l2 2 4-4.5"/></svg></div>
         <h3>Eerlijke aannames</h3>
-        <p>We rekenen met openbare bronnen (CBS-tarieven, Milieu Centraal) en de echte wettekst — en benoemen precies waar het een schatting is.</p>
+        <p>We rekenen met openbare bronnen (CBS-tarieven, Milieu Centraal) en de echte wettekst, en benoemen precies waar het een schatting is.</p>
       </div>
       <div class="quote benefit">
         <div class="q-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg></div>
-        <h3>Vrijblijvend — jij beslist</h3>
+        <h3>Vrijblijvend: jij beslist</h3>
         <p>Je advies is gratis en je zit nergens aan vast. Bellen doen we alleen met jouw toestemming, en je kunt je altijd afmelden.</p>
       </div>
     </div>
@@ -673,11 +744,11 @@
     <div class="faq-list">
       <details>
         <summary>Stopt de salderingsregeling echt? <span class="pm"></span></summary>
-        <div class="faq-body">Ja. De Eerste Kamer heeft de <em>Wet be&euml;indiging salderingsregeling</em> aangenomen. Vanaf 1 januari 2027 kun je opgewekte stroom niet meer wegstrepen tegen je verbruik. Je krijgt dan een terugleververgoeding van minimaal 50% van het kale leveringstarief (het tarief zonder belasting) — een stuk lager dan wat je nu via salderen terugkrijgt.</div>
+        <div class="faq-body">Ja. De Eerste Kamer heeft de <em>Wet be&euml;indiging salderingsregeling</em> aangenomen. Vanaf 1 januari 2027 kun je opgewekte stroom niet meer wegstrepen tegen je verbruik. Je krijgt dan een terugleververgoeding van minimaal 50% van het kale leveringstarief (het tarief zonder belasting), een stuk lager dan wat je nu via salderen terugkrijgt.</div>
       </details>
       <details>
         <summary>Hoe wordt mijn verlies berekend? <span class="pm"></span></summary>
-        <div class="faq-body">We rekenen met gemiddelden: ongeveer 340 kWh opbrengst per paneel per jaar en zo'n 30% direct eigen verbruik zonder batterij (bron: Milieu Centraal). De overige ~70% lever je terug — en juist daar zit vanaf 2027 je verlies. De uitkomst is een indicatie op basis van jouw eigen teruglevering.</div>
+        <div class="faq-body">We rekenen met gemiddelden: ongeveer 340 kWh opbrengst per paneel per jaar en zo'n 30% direct eigen verbruik zonder batterij (bron: Milieu Centraal). De overige ~70% lever je terug, en juist daar zit vanaf 2027 je verlies. De uitkomst is een indicatie op basis van jouw eigen teruglevering.</div>
       </details>
       <details>
         <summary>Is het batterij-advies echt gratis en vrijblijvend? <span class="pm"></span></summary>
@@ -689,7 +760,7 @@
       </details>
       <details>
         <summary>Wat gebeurt er met mijn gegevens? <span class="pm"></span></summary>
-        <div class="faq-body">Met je telefoonnummer kunnen we je bellen voor vrijblijvend advies over een thuisbatterij — meer niet. We verkopen je gegevens niet door en je kunt je altijd weer afmelden. Lees de volledige <a href="privacy.html">privacyverklaring</a>.</div>
+        <div class="faq-body">Met je telefoonnummer kunnen we je bellen voor vrijblijvend advies over een thuisbatterij, meer niet. We verkopen je gegevens niet door en je kunt je altijd weer afmelden. Lees de volledige <a href="privacy.html">privacyverklaring</a>.</div>
       </details>
     </div>
   </div>
@@ -698,7 +769,7 @@
 <section class="final">
   <div class="wrap">
     <h2>De saldering stopt. Je verlies begint vanzelf.</h2>
-    <p>Ontdek in 30 seconden wat het jou kost — en welke batterij dat verlies grotendeels voorkomt.</p>
+    <p>Ontdek in 30 seconden wat het jou kost, en welke batterij dat verlies grotendeels voorkomt.</p>
     <a href="#rekentool" class="btn btn-solar">Welke batterij past bij mij?</a>
   </div>
 </section>
@@ -706,7 +777,7 @@
 <footer>
   <div class="wrap">
     <div class="disc">
-      <strong style="color:var(--on-ink);">Salderingscheck</strong> — gratis &amp; vrijblijvend advies over thuisbatterijen.<br><br>
+      <strong style="color:var(--on-ink);">Salderingscheck</strong>: gratis &amp; vrijblijvend advies over thuisbatterijen.<br><br>
       Alle bedragen zijn indicatief en gebaseerd op gemiddelden (~340 kWh per paneel per jaar, ~30% eigen verbruik zonder batterij volgens Milieu Centraal, een all-in stroomtarief van &euro;0,26/kWh en een kaal leveringstarief van &euro;0,10/kWh volgens CBS, januari 2026) en op de <em>Wet be&euml;indiging salderingsregeling</em> (terugleververgoeding minimaal 50% van het kale tarief, eerste 3 jaar). De 10-jaarsprojectie gaat uit van gelijkblijvende tarieven en is puur indicatief. Genoemde batterijprijzen en terugverdientijden zijn eveneens indicaties op basis van actuele marktprijzen begin 2026 en kunnen per leverancier, capaciteit en energiecontract afwijken. Je werkelijke situatie kan afwijken; dit is geen persoonlijk financieel advies.
     </div>
   </div>
@@ -714,9 +785,21 @@
     <div class="wrap footer-bedrijf-inner">
       <a href="over-ons.html">Over ons</a>
       <a href="privacy.html">Privacyverklaring</a>
+      <a href="voorwaarden.html">Gebruiksvoorwaarden</a>
     </div>
   </div>
 </footer>
+
+<!-- ── Cookietoestemming: Clarity laadt pas ná akkoord ── -->
+<div class="consent-bar hidden" id="consentBar" role="dialog" aria-label="Cookietoestemming">
+  <div class="consent-inner">
+    <p class="consent-text">We gebruiken analytische cookies (Microsoft Clarity) om te zien hoe de site gebruikt wordt en die te verbeteren. Dit gebeurt alleen met jouw toestemming. Lees meer in onze <a href="privacy.html">privacyverklaring</a>.</p>
+    <div class="consent-acties">
+      <button class="consent-weiger" onclick="consentKeuze(false)">Weigeren</button>
+      <button class="consent-accept" onclick="consentKeuze(true)">Accepteren</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── Advies-melding: slidet van bovenaf in beeld, blokkeert niks ── -->
 <div class="advies-slide" id="adviesPopup" role="dialog" aria-labelledby="adviesPopupTitel">
@@ -744,7 +827,7 @@
     <button class="boek-close" onclick="sluitBoek()" aria-label="Sluiten">&times;</button>
     <div class="boek-tag">Gratis &amp; vrijblijvend</div>
     <h3 id="boekTitel">Plan je belafspraak</h3>
-    <p class="boek-sub">Kies wanneer het jou uitkomt. Een specialist belt je dan voor een exacte doorrekening — je zit nergens aan vast.</p>
+    <p class="boek-sub">Kies wanneer het jou uitkomt. Een specialist belt je dan voor een exacte doorrekening, je zit nergens aan vast.</p>
 
     <div class="boek-step">
       <div class="boek-label"><span>1</span> Kies een dag</div>
@@ -789,6 +872,42 @@ if(!sessionStorage.getItem('bc_bezocht')){
   sessionStorage.setItem('bc_bezocht', '1');
   trackEvent('bezoek');
 }
+
+/* ══════════════════════════════════════════════════════════════
+   COOKIETOESTEMMING + MICROSOFT CLARITY
+   Clarity (sessie-inzicht + heatmaps) laadt UITSLUITEND nadat de
+   bezoeker op "Accepteren" heeft geklikt. Bij weigeren gebeurt er
+   niets en wordt de keuze onthouden.
+
+   >>> VUL HIERONDER JE EIGEN CLARITY PROJECT-ID IN <<<
+   Die vind je op https://clarity.microsoft.com na het aanmaken van
+   een gratis project (Settings → Overview → "Clarity project id").
+══════════════════════════════════════════════════════════════ */
+const CLARITY_ID = 'xv5uojjpbv';
+function laadClarity(){
+  if(!CLARITY_ID || CLARITY_ID === 'JOUW_CLARITY_ID') return; // nog geen id ingevuld: niets laden
+  if(window.__clarityGeladen) return; window.__clarityGeladen = true;
+  (function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window,document,"clarity","script",CLARITY_ID);
+}
+function consentKeuze(akkoord){
+  try{ localStorage.setItem('bc_consent', akkoord ? 'accepted' : 'declined'); }catch(e){}
+  const bar = document.getElementById('consentBar');
+  if(bar) bar.classList.add('hidden');
+  if(akkoord) laadClarity();
+}
+(function(){
+  let keuze = null;
+  try{ keuze = localStorage.getItem('bc_consent'); }catch(e){}
+  if(keuze === 'accepted'){ laadClarity(); }
+  else if(keuze !== 'declined'){
+    const bar = document.getElementById('consentBar');
+    if(bar) bar.classList.remove('hidden');
+  }
+})();
 
 /* ══════════════════════════════════════════════════════════════
    AFTELKLOK tot 1 januari 2027
@@ -853,7 +972,9 @@ function bewaarStatus(){
 let funnelStap = { berekend:false, piekdag:false, formulier:false };
 function berekenVerlies(){
   const panelen = parseInt(document.getElementById('c_panelen').value);
-  if(!panelen || panelen < 1){ alert('Vul het aantal zonnepanelen in.'); document.getElementById('c_panelen').focus(); return; }
+  // 0 is een geldige invoer (dan is er simpelweg geen teruglevering en dus €0 verlies);
+  // alleen een leeg veld of een negatief getal weren we
+  if(isNaN(panelen) || panelen < 0){ alert('Vul het aantal zonnepanelen in.'); document.getElementById('c_panelen').focus(); return; }
   if(!funnelStap.berekend){ funnelStap.berekend = true; trackEvent('berekend'); }
 
   // Korte "we berekenen je situatie"-status: geeft de indruk (en geeft ook
@@ -906,8 +1027,9 @@ function voerBerekeningUit(panelen){
   const teaser = document.getElementById('teaserCard');
   if(teaser) teaser.classList.remove('unlocked');
 
-  // stap 2 (piekdag-vraag) meteen tonen, direct onder het verlies
-  toonPiekdagVraag();
+  // na het verlies eerst de oplossing-brug tonen (wat is een thuisbatterij?),
+  // vandaaruit klikt de bezoeker door naar stap 2 (de piekdag-vraag)
+  toonSolutionBridge();
 
   // scroll de meter in beeld op mobiel
   if(window.innerWidth < 780){
@@ -976,10 +1098,10 @@ function aanbevolenCapaciteit(piekKwh){
 
 let piekdagSchattingWaarde = null;
 
-function toonPiekdagVraag(){
-  if(!funnelStap.piekdag){ funnelStap.piekdag = true; trackEvent('piekdag_geopend'); }
-  const blok = document.getElementById('piekdagBlok');
-  blok.classList.remove('hidden');
+// Toon de oplossing-brug (uitleg thuisbatterij) direct onder het verlies.
+// De piekdag-schatting rekenen we hier alvast uit zodat 'ie klaarstaat.
+function toonSolutionBridge(){
+  document.getElementById('solutionBridge').classList.remove('hidden');
   // richtinggevende schatting: op de zonnigste dag lever je gemiddeld
   // een veelvoud van je gemiddelde dagelijkse teruglevering terug
   // (vuistregel: piekdag ≈ 3x het jaargemiddelde, door het seizoenseffect)
@@ -989,16 +1111,41 @@ function toonPiekdagVraag(){
   }
 }
 
+// Bezoeker klikt "Blijf winst maken met een thuisbatterij" → stap 2 verschijnt.
+function startBatterijAdvies(){
+  if(!funnelStap.piekdag){ funnelStap.piekdag = true; trackEvent('piekdag_geopend'); }
+  const bridgeBtn = document.getElementById('bridgeBtn');
+  if(bridgeBtn) bridgeBtn.classList.add('hidden'); // knop verdwijnt zodra hij z'n werk heeft gedaan
+  const blok = document.getElementById('piekdagBlok');
+  blok.classList.remove('hidden');
+  blok.scrollIntoView({behavior:'smooth', block:'center'});
+  setTimeout(()=>{ const p=document.getElementById('p_piekdag'); if(p) p.focus({preventScroll:true}); }, 400);
+}
+
 function gebruikSchatting(){
   if(piekdagSchattingWaarde == null) return;
   const input = document.getElementById('p_piekdag');
   input.value = piekdagSchattingWaarde;
   input.focus({preventScroll:true});
+  updateAdviesBtn();
 }
+
+// De advies-knop springt van donker (btn-ink) naar amber (btn-solar) zodra
+// er een geldige teruglevering staat — een duidelijk visueel "klaar om te
+// klikken"-signaal dat de doorklik naar het formulier aanmoedigt.
+function updateAdviesBtn(){
+  const btn = document.getElementById('adviesBtn');
+  if(!btn) return;
+  const piek = parseFloat(document.getElementById('p_piekdag').value);
+  const geldig = piek > 0;
+  btn.classList.toggle('btn-solar', geldig);
+  btn.classList.toggle('btn-ink', !geldig);
+}
+document.getElementById('p_piekdag').addEventListener('input', updateAdviesBtn);
 
 function toonLeadForm(){
   const piek = parseFloat(document.getElementById('p_piekdag').value);
-  if(!piek || piek <= 0){ alert('Vul in wat je ongeveer op je zonnigste dag teruglevert — of gebruik onze schatting.'); return; }
+  if(!piek || piek <= 0){ alert('Vul in wat je ongeveer op je zonnigste dag teruglevert, of gebruik onze schatting.'); return; }
   if(laatsteBerekening) laatsteBerekening.piekdagKwh = piek;
   if(!funnelStap.formulier){ funnelStap.formulier = true; trackEvent('formulier_bereikt'); }
 
@@ -1136,7 +1283,7 @@ async function verstuurLead(){
 
   // 2) de grote onthulling in de bedankt-kaart, met batterij-animatie
   document.getElementById('batKwh').textContent = capaciteit;
-  document.getElementById('batNote').textContent = `Op basis van je piekdag van ${laatsteBerekening.piekdagKwh} kWh teruglevering — groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
+  document.getElementById('batNote').textContent = `Op basis van je piekdag van ${laatsteBerekening.piekdagKwh} kWh teruglevering, groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
   // specialist-boeking terugzetten naar begintoestand
   document.getElementById('adviesUpgrade').classList.remove('hidden');
   document.getElementById('specialistDone').classList.add('hidden');
@@ -1322,7 +1469,7 @@ function herstelStatus(){
   document.getElementById('advies').classList.remove('hidden');
   document.getElementById('leadForm').classList.add('hidden');
   document.getElementById('batKwh').textContent = cap;
-  document.getElementById('batNote').textContent = `Op basis van je piekdag van ${s.berekening.piekdagKwh} kWh teruglevering — groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
+  document.getElementById('batNote').textContent = `Op basis van je piekdag van ${s.berekening.piekdagKwh} kWh teruglevering, groot genoeg om ook je zonnigste dag volledig zelf te gebruiken.`;
   document.getElementById('thanksCard').classList.remove('hidden');
 
   if(s.warm){
@@ -1341,8 +1488,8 @@ function herstelStatus(){
 
   // welkom-terug balk bovenaan
   document.getElementById('terugTekst').textContent = s.warm
-    ? `Welkom terug — je belafspraak (${s.warmVoorkeur}) staat klaar.`
-    : 'Welkom terug — je batterij-advies staat klaar.';
+    ? `Welkom terug! Je belafspraak (${s.warmVoorkeur}) staat klaar.`
+    : 'Welkom terug! Je batterij-advies staat klaar.';
   document.getElementById('terugBar').classList.remove('hidden');
 }
 document.addEventListener('DOMContentLoaded', herstelStatus);

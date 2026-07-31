@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const ROOT = __dirname;
 const PORT = process.env.PORT || 5600;
-const MIME = { '.html':'text/html', '.js':'application/javascript', '.css':'text/css', '.json':'application/json', '.png':'image/png' };
+const MIME = { '.html':'text/html', '.js':'application/javascript', '.css':'text/css', '.json':'application/json', '.png':'image/png', '.woff2':'font/woff2', '.woff':'font/woff' };
 http.createServer((req, res) => {
   const fp = path.join(ROOT, req.url === '/' ? '/index.html' : req.url.split('?')[0]);
   const ext = path.extname(fp);
