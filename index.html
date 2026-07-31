@@ -116,8 +116,9 @@
   .calc-result{ background:var(--ink); color:var(--on-ink); padding:30px 28px; display:flex; flex-direction:column; justify-content:center; position:relative; }
   .calc-result::before{ content:""; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, rgba(255,179,0,.5), transparent); }
   .result-empty{ text-align:center; color:var(--on-ink-dim); }
-  .result-empty svg{ width:42px; height:42px; color:var(--solar); opacity:.55; margin-bottom:12px; }
-  .result-empty p{ font-size:14px; max-width:24ch; margin:0 auto; }
+  .re-badge{ display:inline-block; font-family:var(--fd); font-weight:700; font-size:11.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--solar); background:rgba(255,179,0,.12); border:1px solid rgba(255,179,0,.3); border-radius:99px; padding:5px 14px; margin-bottom:18px; }
+  .re-amount{ font-family:var(--fd); font-weight:900; font-size:clamp(46px,8vw,68px); line-height:1; letter-spacing:-2px; color:rgba(255,255,255,.16); margin-bottom:16px; }
+  .result-empty p{ font-size:14px; max-width:27ch; margin:0 auto; line-height:1.5; }
   .meter-label{ font-size:12.5px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; color:var(--on-ink-dim); }
   .meter-big{ font-family:var(--fd); font-weight:900; font-size:clamp(48px,9vw,72px); line-height:1; letter-spacing:-2px; color:var(--lose); font-variant-numeric:tabular-nums; margin:6px 0 2px; text-shadow:0 0 32px rgba(255,90,95,.25); }
   .meter-sub{ font-size:14px; color:var(--on-ink-dim); }
@@ -178,8 +179,11 @@
   .solution-bridge{ margin-top:18px; padding:18px 18px 20px; background:rgba(255,179,0,.08); border:1px solid rgba(255,179,0,.32); border-radius:14px; }
   .solution-bridge .sb-head{ display:flex; align-items:center; gap:9px; font-family:var(--fd); font-weight:800; font-size:15px; color:var(--on-ink); line-height:1.25; }
   .solution-bridge .sb-head svg{ width:21px; height:21px; color:var(--solar); flex-shrink:0; }
-  .solution-bridge p{ font-size:13.5px; color:var(--on-ink-dim); line-height:1.55; margin:11px 0 16px; }
+  .solution-bridge p{ font-size:13.5px; color:var(--on-ink-dim); line-height:1.55; margin:11px 0 12px; }
   .solution-bridge p b{ color:var(--on-ink); }
+  .solution-bridge .sb-list{ list-style:none; margin:0 0 16px; display:flex; flex-direction:column; gap:9px; }
+  .solution-bridge .sb-list li{ display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--on-ink); }
+  .solution-bridge .sb-list li svg{ width:17px; height:17px; color:var(--keep); flex-shrink:0; }
   .solution-bridge .btn{ width:100%; }
 
   /* ── Piekdag-vraag (tussenstap vóór het batterij-advies) ── */
@@ -422,8 +426,8 @@
 <header class="hero">
   <div class="wrap">
     <span class="eyebrow"><span class="dot"></span>Wetswijziging · 1 januari 2027</span>
-    <h1>Straks krijg je bijna <span class="hl">niets</span> meer voor je eigen zonnestroom.</h1>
-    <p class="lede">De salderingsregeling stopt definitief. Reken in 30 seconden uit wat dat jóú per jaar kost, en hoe je het grootste deel ervan houdt.</p>
+    <h1>Vanaf 2027 krijg je bijna <span class="hl">niets</span> meer voor je zonnestroom.</h1>
+    <p class="lede">De salderingsregeling stopt definitief. Bereken in 30 seconden wat dat jóú per jaar kost, en wat je eraan kunt doen.</p>
     <div class="hero-badges">
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Gratis &amp; vrijblijvend</span>
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Geen account nodig</span>
@@ -472,8 +476,9 @@
 
       <div class="calc-result" id="resultPane">
         <div class="result-empty" id="resultEmpty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
-          <p>Vul je gegevens in en zie meteen wat de salderingsstop jou kost.</p>
+          <div class="re-badge">Jouw geschatte verlies</div>
+          <div class="re-amount">€&nbsp;?</div>
+          <p>Beantwoord de drie korte vragen, dan verschijnt hier direct wat de salderingsstop jou per jaar kost.</p>
         </div>
         <div id="resultFilled" class="hidden">
           <div class="meter-label">Geschat verlies vanaf 2027</div>
@@ -488,9 +493,14 @@
           <div class="solution-bridge hidden" id="solutionBridge">
             <div class="sb-head">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 10v4"/><path d="M8 9l-2 3h4l-2 3"/></svg>
-              Dit verlies is grotendeels te voorkomen
+              Goed nieuws: dit verlies is grotendeels te voorkomen
             </div>
-            <p>Een <b>thuisbatterij</b> bewaart de stroom die je overdag opwekt, zodat je 'm 's avonds zelf gebruikt in plaats van 'm bijna gratis terug te leveren. Zo houd je het grootste deel van je opbrengst in eigen zak.</p>
+            <p>Met een <b>thuisbatterij</b> bewaar je je zonnestroom voor later, in plaats van 'm bijna gratis terug te leveren:</p>
+            <ul class="sb-list">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Overdag sla je je eigen stroom op</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'s Avonds gebruik je 'm zelf</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Je levert veel minder terug tegen het lage tarief</li>
+            </ul>
             <button class="btn btn-solar" id="bridgeBtn" onclick="startBatterijAdvies()">
               Ontdek wat een thuisbatterij voor je doet
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -531,8 +541,8 @@
   <div class="wrap">
     <div class="sec-head">
       <div class="sec-tag">De oplossing</div>
-      <h2>Een thuisbatterij draait het verlies om.</h2>
-      <p>Overdag bewaar je je opgewekte stroom in de batterij, en 's avonds gebruik je 'm zelf. Zo lever je veel minder terug tegen dat lage tarief, en houd je je opbrengst grotendeels in eigen zak.</p>
+      <h2>Een thuisbatterij houdt je zonnestroom thuis.</h2>
+      <p>Overdag sla je je eigen stroom op, en 's avonds gebruik je 'm zelf. Zo lever je veel minder terug tegen dat lage tarief en houd je het grootste deel van je opbrengst in eigen zak.</p>
     </div>
     <div class="steps">
       <div class="step">
@@ -600,12 +610,12 @@
   <div class="wrap">
     <div class="lead-grid">
       <div class="lead-copy">
-        <h2>Nog één stap tot je advies.</h2>
-        <p>Vul je gegevens in en zie direct welke batterijcapaciteit bij jouw teruglevering past. Vrijblijvend, je zit nergens aan vast.</p>
+        <h2>Je persoonlijke advies staat klaar.</h2>
+        <p>Rond deze laatste stap af, dan zie je direct welke batterijcapaciteit bij jouw teruglevering past. En je zit nergens aan vast.</p>
         <div class="howto">
-          <div class="row"><div class="num">1</div><div><b>Je vult je gegevens in</b><span>Duurt 20 seconden, geen verplichtingen.</span></div></div>
-          <div class="row"><div class="num">2</div><div><b>Je ziet direct welke batterij bij je past</b><span>Op basis van je eigen teruglevering.</span></div></div>
-          <div class="row"><div class="num">3</div><div><b>Zonder verplichtingen</b><span>Jij beslist zelf wat je met het advies doet.</span></div></div>
+          <div class="row"><div class="num">&#10003;</div><div><b>100% gratis</b><span>Je betaalt niets en zit nergens aan vast.</span></div></div>
+          <div class="row"><div class="num">&#10003;</div><div><b>Geen spam</b><span>We bellen je één keer voor advies, meer niet. Je gegevens gaan niet naar derden.</span></div></div>
+          <div class="row"><div class="num">&#10003;</div><div><b>Jij houdt de regie</b><span>Je kunt je altijd afmelden of je gegevens laten verwijderen.</span></div></div>
         </div>
       </div>
 
@@ -709,23 +719,6 @@
       <div class="st"><b class="tnum">2027</b><span>Saldering stopt definitief</span></div>
       <div class="st"><b class="tnum">2 min</b><span>Meer tijd kost het niet</span></div>
       <div class="st"><b class="tnum">~70%</b><span>Van je opwek lever je nu terug</span></div>
-    </div>
-    <div class="quotes">
-      <div class="quote benefit">
-        <div class="q-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.9 12.6a.6.6 0 0 0 .5 1h5.1l-1 8 8.6-11.2a.6.6 0 0 0-.5-1h-5.2z"/></svg></div>
-        <h3>Direct resultaat</h3>
-        <p>Geen wachten op een offerte of terugbelverzoek: je ziet meteen op de site welke batterijcapaciteit bij jouw situatie past.</p>
-      </div>
-      <div class="quote benefit">
-        <div class="q-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5c0 4.5 3.4 7.9 8 9.5 4.6-1.6 8-5 8-9.5v-5z"/><path d="M9 12l2 2 4-4.5"/></svg></div>
-        <h3>Eerlijke aannames</h3>
-        <p>We rekenen met openbare bronnen (CBS-tarieven, Milieu Centraal) en de echte wettekst, en benoemen precies waar het een schatting is.</p>
-      </div>
-      <div class="quote benefit">
-        <div class="q-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>
-        <h3>Persoonlijk advies, geen callcenter</h3>
-        <p>Je wordt geholpen door een échte adviseur die vrijblijvend met je meedenkt over de mogelijkheden. Gratis en zonder verplichtingen: jij bepaalt zelf wat je met de informatie doet.</p>
-      </div>
     </div>
   </div>
 </section>
@@ -1161,7 +1154,7 @@ function toonLeadForm(){
   // het gegevensformulier (stap 3) verschijnt pas nu, nadat de piekdag is ingevuld
   document.getElementById('advies').classList.remove('hidden');
   document.getElementById('advies').scrollIntoView({behavior:'smooth', block:'start'});
-  setTimeout(()=>{ const n=document.getElementById('l_telefoon'); if(n) n.focus({preventScroll:true}); }, 600);
+  setTimeout(()=>{ const n=document.getElementById('l_voornaam'); if(n) n.focus({preventScroll:true}); }, 600);
 }
 
 /* ══════════════════════════════════════════════════════════════
